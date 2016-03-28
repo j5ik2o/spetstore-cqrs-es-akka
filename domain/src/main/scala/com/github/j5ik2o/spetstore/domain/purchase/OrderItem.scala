@@ -10,12 +10,12 @@ import com.github.j5ik2o.spetstore.domain.item.ItemId
  * @param quantity 数量
  */
 case class OrderItem(
-  id:       OrderItemId,
-  status:   StatusType.Value,
-  no:       Int,
-  itemId:   ItemId,
-  quantity: Int,
-  version:  Option[Long]
+    id:       OrderItemId,
+    status:   StatusType.Value,
+    no:       Int,
+    itemId:   ItemId,
+    quantity: Int,
+    version:  Option[Long]
 ) {
 
 }

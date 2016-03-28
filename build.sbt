@@ -59,11 +59,19 @@ val writeInterface = (project in file("write-interface"))
   .settings(commonSettings: _*)
   .dependsOn(writeUseCase, infrastructure)
 
+val readUseCase = (project in file("read-use-case"))
+  .dependsOn(domain, infrastructure)
+  .settings(commonSettings: _*).dependsOn(domain)
+
+val readInterface = (project in file("read-interface"))
+  .settings(commonSettings: _*)
+  .dependsOn(readUseCase, infrastructure)
+
 val akkaHttpApplication  = (project in file("akka-http-application"))
   .settings(commonSettings: _*)
-  .dependsOn(writeUseCase, writeInterface)
+  .dependsOn(writeInterface, readInterface)
 
 val root = (project in file("."))
   .settings(commonSettings: _*).settings(
   name := "spetstore-cqrs-es-akka"
-).aggregate(infrastructure, domain, writeUseCase, writeInterface, akkaHttpApplication)
+).aggregate(infrastructure, domain, writeUseCase, writeInterface, readUseCase, readInterface, akkaHttpApplication)

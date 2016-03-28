@@ -25,11 +25,11 @@ object CartEvent {
  * @param cartItems [[CartItem]]のリスト
  */
 case class Cart(
-  id:         CartId,
-  status:     StatusType.Value,
-  customerId: CustomerId,
-  cartItems:  List[CartItem],
-  version:    Option[Long]
+    id:         CartId,
+    status:     StatusType.Value,
+    customerId: CustomerId,
+    cartItems:  List[CartItem],
+    version:    Option[Long]
 ) extends BaseEntity[CartId] {
 
   override type This = Cart
