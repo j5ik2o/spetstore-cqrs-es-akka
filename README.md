@@ -14,4 +14,4 @@
     - read-interface
     - read-use-case
 - 共通インフラストラクチャ
-　　- infrastructure
+    - infrastructure
