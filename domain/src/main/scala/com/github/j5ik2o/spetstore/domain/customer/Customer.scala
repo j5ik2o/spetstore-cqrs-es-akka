@@ -2,7 +2,7 @@ package com.github.j5ik2o.spetstore.domain.customer
 
 import java.util.UUID
 
-import com.github.j5ik2o.spetstore.domain.basic.{SexType, StatusType}
+import com.github.j5ik2o.spetstore.domain.basic.{ SexType, StatusType }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 sealed trait CustomerCommandRequest extends CommandRequest[CustomerId] {
@@ -21,15 +21,17 @@ trait CustomerGetCommandRequest extends CustomerCommandRequest with GetCommandRe
 
 object CustomerCommandRequest {
 
-  case class CreateCustomer(id: CommandRequestId,
-                            entityId: CustomerId,
-                            status: StatusType.Value,
-                            name: String,
-                            sexType: SexType.Value,
-                            profile: CustomerProfile,
-                            config: CustomerConfig,
-                            version: Option[Long])
-    extends CustomerCreateCommandRequest {
+  case class CreateCustomer(
+    id:       CommandRequestId,
+    entityId: CustomerId,
+    status:   StatusType.Value,
+    name:     String,
+    sexType:  SexType.Value,
+    profile:  CustomerProfile,
+    config:   CustomerConfig,
+    version:  Option[Long]
+  )
+      extends CustomerCreateCommandRequest {
     override def toEvent: CustomerEvent.CustomerCreated = CustomerEvent.CustomerCreated(
       EventId(UUID.randomUUID()),
       entityId,
@@ -74,7 +76,6 @@ object CustomerCommandResponse {
 
 }
 
-
 sealed trait CustomerEvent extends Event
 
 trait CustomerCreateEvent extends CustomerEvent with CreateEvent
@@ -86,13 +87,13 @@ object CustomerEvent {
   case class NameUpdated(id: EventId, name: String) extends CustomerUpdateEvent
 
   case class CustomerCreated(id: EventId, customerId: CustomerId,
-                             status: StatusType.Value,
-                             name: String,
+                             status:  StatusType.Value,
+                             name:    String,
                              sexType: SexType.Value,
                              profile: CustomerProfile,
-                             config: CustomerConfig,
+                             config:  CustomerConfig,
                              version: Option[Long])
-    extends CustomerCreateEvent
+      extends CustomerCreateEvent
 
 }
 
@@ -103,26 +104,26 @@ object Customer extends EntityFactory[CustomerId, Customer] {
   }
 }
 
-
 /**
-  * ペットストアの顧客を表すエンティティ。
-  *
-  * @param id      識別子
-  * @param status  [[StatusType]]
-  * @param name    名前
-  * @param sexType 性別
-  * @param profile [[CustomerProfile]]
-  * @param config  [[CustomerConfig]]
-  */
-case class Customer
-(id: CustomerId,
- status: StatusType.Value,
- name: String,
- sexType: SexType.Value,
- profile: CustomerProfile,
- config: CustomerConfig,
- version: Option[Long])
-  extends BaseEntity[CustomerId] {
+ * ペットストアの顧客を表すエンティティ。
+ *
+ * @param id      識別子
+ * @param status  [[StatusType]]
+ * @param name    名前
+ * @param sexType 性別
+ * @param profile [[CustomerProfile]]
+ * @param config  [[CustomerConfig]]
+ */
+case class Customer(
+  id:      CustomerId,
+  status:  StatusType.Value,
+  name:    String,
+  sexType: SexType.Value,
+  profile: CustomerProfile,
+  config:  CustomerConfig,
+  version: Option[Long]
+)
+    extends BaseEntity[CustomerId] {
 
   override type This = Customer
 
@@ -138,7 +139,4 @@ case class Customer
   }
 
 }
-
-
-
 

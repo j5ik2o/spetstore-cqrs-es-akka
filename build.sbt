@@ -1,4 +1,5 @@
 import com.typesafe.sbt.SbtScalariform._
+
 import scalariform.formatter.preferences._
 
 val formatPreferences = FormattingPreferences()
@@ -13,7 +14,10 @@ val commonSettings = Seq(
   organization := "com.github.j5ik2o",
   version := "1.0.0-SNAPSHOT",
   scalaVersion := "2.11.8",
-  scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-encoding", "UTF-8", "-language:existentials", "-language:implicitConversions", "-language:postfixOps")
+  scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-encoding", "UTF-8", "-language:existentials", "-language:implicitConversions", "-language:postfixOps"),
+  libraryDependencies ++= Seq(
+    "org.scala-lang.modules" %% "scala-java8-compat" % "0.7.0"
+  )
 ) ++ SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Compile := formatPreferences,
   ScalariformKeys.preferences in Test := formatPreferences)
@@ -36,8 +40,8 @@ val infrastructure = (project in file("infrastructure"))
       "ch.qos.logback" % "logback-classic" % "1.1.3",
       "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.4.2" % "test",
       "com.github.nscala-time" %% "nscala-time" % "2.10.0",
-      "org.skinny-framework" %% "skinny-orm"      % "2.0.7",
-      "com.h2database"       %  "h2"              % "1.4.+",
+      "org.skinny-framework" %% "skinny-orm" % "2.0.7",
+      "com.h2database" % "h2" % "1.4.+",
       "de.knutwalker" %% "typed-actors" % "1.6.0-a24",
       "de.knutwalker" %% "typed-actors-creator" % "1.6.0-a24"
     )
@@ -47,20 +51,19 @@ val domain = (project in file("domain"))
   .dependsOn(infrastructure)
   .settings(commonSettings: _*)
 
-val usecase = (project in file("usecase"))
+val writeUseCase = (project in file("write-use-case"))
   .dependsOn(domain, infrastructure)
   .settings(commonSettings: _*).dependsOn(domain)
 
-val interface = (project in file("interface"))
-  .dependsOn(usecase, infrastructure)
-  .settings(commonSettings: _*).dependsOn(usecase)
+val writeInterface = (project in file("write-interface"))
+  .settings(commonSettings: _*)
+  .dependsOn(writeUseCase, infrastructure)
 
-val application = (project in file("application"))
-  .dependsOn(usecase, interface)
-  .settings(commonSettings: _*).dependsOn(interface)
+val akkaHttpApplication  = (project in file("akka-http-application"))
+  .settings(commonSettings: _*)
+  .dependsOn(writeUseCase, writeInterface)
 
 val root = (project in file("."))
-  .aggregate(infrastructure, domain, usecase, interface, application)
   .settings(commonSettings: _*).settings(
-    name := "spetstore-cqrs-es-akka"
-  )
+  name := "spetstore-cqrs-es-akka"
+).aggregate(infrastructure, domain, writeUseCase, writeInterface, akkaHttpApplication)

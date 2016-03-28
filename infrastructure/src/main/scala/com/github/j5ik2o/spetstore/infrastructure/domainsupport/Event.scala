@@ -4,7 +4,7 @@ import java.util.UUID
 
 case class EventId(value: UUID) extends Identifier[UUID]
 
-trait Event extends Entity[EventId]{
+trait Event extends Entity[EventId] {
 
 }
 

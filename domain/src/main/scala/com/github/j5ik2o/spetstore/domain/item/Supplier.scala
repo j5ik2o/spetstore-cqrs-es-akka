@@ -1,6 +1,6 @@
 package com.github.j5ik2o.spetstore.domain.item
 
-import com.github.j5ik2o.spetstore.domain.basic.{Contact, PostalAddress, StatusType}
+import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 trait SupplierEvent extends Event
@@ -15,21 +15,22 @@ object SupplierEvent {
 
 }
 /**
-  * 仕入れ先を表すエンティティ。
-  *
-  * @param id            [[SupplierId]]
-  * @param name          名前
-  * @param postalAddress 住所
-  * @param contact       連絡先
-  */
-case class Supplier
-(id: SupplierId,
- status: StatusType.Value,
- name: String,
- postalAddress: PostalAddress,
- contact: Contact,
- version: Option[Long])
-  extends BaseEntity[SupplierId] {
+ * 仕入れ先を表すエンティティ。
+ *
+ * @param id            [[SupplierId]]
+ * @param name          名前
+ * @param postalAddress 住所
+ * @param contact       連絡先
+ */
+case class Supplier(
+  id:            SupplierId,
+  status:        StatusType.Value,
+  name:          String,
+  postalAddress: PostalAddress,
+  contact:       Contact,
+  version:       Option[Long]
+)
+    extends BaseEntity[SupplierId] {
 
   override type This = Supplier
 
@@ -38,7 +39,6 @@ case class Supplier
   override def withVersion(version: Long): Entity[SupplierId] =
     copy(version = Some(version))
 
-
   override def updateState: StateMachine = {
     case SupplierEvent.NameUpdated(_, entityId, value) =>
       require(id == entityId)
@@ -46,5 +46,4 @@ case class Supplier
   }
 
 }
-
 

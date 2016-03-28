@@ -1,15 +1,15 @@
 package com.github.j5ik2o.spetstore.infrastructure.domainsupport
 
 /**
-  * [[Entity]]の識別子を表すトレイト。
-  *
-  * @tparam A 識別子の値型
-  */
+ * [[Entity]]の識別子を表すトレイト。
+ *
+ * @tparam A 識別子の値型
+ */
 trait Identifier[+A] {
 
   /**
-    * 識別子の値。
-    */
+   * 識別子の値。
+   */
   def value: A
 
   val isDefined: Boolean = true
@@ -26,7 +26,6 @@ trait Identifier[+A] {
 
 }
 
-
 object EmptyIdentifier extends EmptyIdentifier
 
 trait EmptyIdentifier extends Identifier[Nothing] {
@@ -37,7 +36,7 @@ trait EmptyIdentifier extends Identifier[Nothing] {
 
   override def equals(obj: Any) = obj match {
     case that: EmptyIdentifier => this eq that
-    case _ => false
+    case _                     => false
   }
 
   override def hashCode = 0

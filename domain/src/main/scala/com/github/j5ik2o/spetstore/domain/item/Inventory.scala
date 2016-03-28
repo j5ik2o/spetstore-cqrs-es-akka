@@ -8,7 +8,6 @@ trait InventoryEvent extends Event
 trait InventoryCreateEvent extends InventoryEvent with CreateEvent
 trait InventoryUpdateEvent extends InventoryEvent with UpdateEvent
 
-
 object InventoryEvent {
 
   case class QuantityUpdated(id: EventId, entityId: InventoryId, quantity: Int)
@@ -16,21 +15,21 @@ object InventoryEvent {
 
 }
 
-
 /**
-  * 在庫を表すエンティティ。
-  *
-  * @param id       [[InventoryId]]
-  * @param itemId   [[ItemId]]
-  * @param quantity 在庫数量
-  */
-case class Inventory
-(id: InventoryId,
- status: StatusType.Value,
- itemId: ItemId,
- quantity: Int,
- version: Option[Long])
-  extends BaseEntity[InventoryId] {
+ * 在庫を表すエンティティ。
+ *
+ * @param id       [[InventoryId]]
+ * @param itemId   [[ItemId]]
+ * @param quantity 在庫数量
+ */
+case class Inventory(
+  id:       InventoryId,
+  status:   StatusType.Value,
+  itemId:   ItemId,
+  quantity: Int,
+  version:  Option[Long]
+)
+    extends BaseEntity[InventoryId] {
 
   override type This = Inventory
 
@@ -38,7 +37,6 @@ case class Inventory
 
   override def withVersion(version: Long): Entity[InventoryId] =
     copy(version = Some(version))
-
 
   override def updateState: StateMachine = {
     case InventoryEvent.QuantityUpdated(_, entityId, value) =>

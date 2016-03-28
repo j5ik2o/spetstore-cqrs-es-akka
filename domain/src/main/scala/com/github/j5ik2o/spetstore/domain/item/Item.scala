@@ -16,24 +16,25 @@ object ItemEvent {
 }
 
 /**
-  * ペットを表すエンティティ。
-  *
-  * @param id          識別子
-  * @param itemTypeId  [[ItemTypeId]]
-  * @param name        名前
-  * @param description 説明
-  * @param price       価格
-  */
-case class Item
-(id: ItemId,
- status: StatusType.Value,
- itemTypeId: ItemTypeId,
- name: String,
- description: Option[String] = None,
- price: BigDecimal,
- supplierId: SupplierId,
- version: Option[Long])
-  extends BaseEntity[ItemId] {
+ * ペットを表すエンティティ。
+ *
+ * @param id          識別子
+ * @param itemTypeId  [[ItemTypeId]]
+ * @param name        名前
+ * @param description 説明
+ * @param price       価格
+ */
+case class Item(
+  id:          ItemId,
+  status:      StatusType.Value,
+  itemTypeId:  ItemTypeId,
+  name:        String,
+  description: Option[String]   = None,
+  price:       BigDecimal,
+  supplierId:  SupplierId,
+  version:     Option[Long]
+)
+    extends BaseEntity[ItemId] {
 
   override type This = Item
 
@@ -46,6 +47,4 @@ case class Item
   }
 
 }
-
-
 
