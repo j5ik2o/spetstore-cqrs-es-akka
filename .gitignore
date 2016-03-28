@@ -1,0 +1,10 @@
+.classpath
+.project
+.settings/
+target/
+project/target
+.cache
+.idea/
+
+jornal
+snapshots
