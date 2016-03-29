@@ -14,10 +14,7 @@ val commonSettings = Seq(
   organization := "com.github.j5ik2o",
   version := "1.0.0-SNAPSHOT",
   scalaVersion := "2.11.8",
-  scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-encoding", "UTF-8", "-language:existentials", "-language:implicitConversions", "-language:postfixOps"),
-  libraryDependencies ++= Seq(
-    "org.scala-lang.modules" %% "scala-java8-compat" % "0.7.0"
-  )
+  scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-encoding", "UTF-8", "-language:existentials", "-language:implicitConversions", "-language:postfixOps")
 ) ++ SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Compile := formatPreferences,
   ScalariformKeys.preferences in Test := formatPreferences)
@@ -67,11 +64,27 @@ val readInterface = (project in file("read-interface"))
   .settings(commonSettings: _*)
   .dependsOn(readUseCase, infrastructure)
 
-val akkaHttpApplication  = (project in file("akka-http-application"))
+val akkaHttpApplication = (project in file("akka-http-application"))
   .settings(commonSettings: _*)
+  .dependsOn(writeInterface, readInterface)
+
+val play2Application = (project in file("play2-application"))
+  //  .enablePlugins(PlayScala, PlayAkkaHttpServer)
+  //  .disablePlugins(PlayNettyServer)
+  .enablePlugins(PlayScala)
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      jdbc,
+      cache,
+      ws,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0-RC1" % Test
+    ),
+    resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+  )
   .dependsOn(writeInterface, readInterface)
 
 val root = (project in file("."))
   .settings(commonSettings: _*).settings(
   name := "spetstore-cqrs-es-akka"
-).aggregate(infrastructure, domain, writeUseCase, writeInterface, readUseCase, readInterface, akkaHttpApplication)
+).aggregate(infrastructure, domain, writeUseCase, writeInterface, readUseCase, readInterface, akkaHttpApplication, play2Application)
