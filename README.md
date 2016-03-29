@@ -1,4 +1,4 @@
-# SpetStore の CQRS+ES版
+# SpetStore の CQRS+ES版(開発中)
 
 ## レイヤー構成
 
@@ -15,3 +15,8 @@
     - read-use-case
 - 共通インフラストラクチャ
 　　- infrastructure
+
+## ポートの定義
+
+- ポートは各層に配置する。
+- publicなtrait, classはポートになり得る。
