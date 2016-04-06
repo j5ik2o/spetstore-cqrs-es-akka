@@ -19,25 +19,23 @@ object EventBus {
 
     val logger = LoggerFactory.getLogger(getClass)
 
-    val m = DistributedPubSub(system).mediator
+    val mediator = DistributedPubSub(system).mediator
 
     val topics = scala.collection.mutable.Map.empty[ActorRef, Class[_]]
 
     override def subscribe(subscriber: ActorRef, to: Class[_]): Boolean = {
-      logger.debug(s">>>>>> subscribe = $subscriber, $to")
       topics += (subscriber -> to)
-      m ! Subscribe(to.toString, subscriber)
+      mediator ! Subscribe(to.toString, subscriber)
       true
     }
 
     override def publish(eventWithSender: EventWithSender): Unit = {
-      m ! Publish(eventWithSender.event.getClass.toString, eventWithSender)
-      logger.debug(s">>>>>> publish = $eventWithSender")
+      mediator ! Publish(eventWithSender.event.getClass.toString, eventWithSender)
     }
 
     override def unsubscribe(subscriber: ActorRef, from: Class[_]): Boolean = {
       if (topics.contains(subscriber)) {
-        m ! Unsubscribe(from.toString, subscriber)
+        mediator ! Unsubscribe(from.toString, subscriber)
         topics -= subscriber
         true
       } else false
@@ -57,37 +55,27 @@ object EventBus {
 
   class EventBusOnLocal(val system: ActorSystem) extends EventBus {
 
-    private val subscribers = scala.collection.mutable.Map.empty[Classifier, List[ActorRef]]
+    private val eventStream = system.eventStream
 
     override def subscribe(subscriber: ActorRef, to: Classifier): Boolean = {
-      subscribers += (to -> (subscriber :: subscribers.getOrElse(to, Nil)))
-      true
+      eventStream.subscribe(subscriber, to)
     }
 
     override def publish(eventWithSender: EventWithSender): Unit = {
-      subscribers.filter {
-        case (k, _) =>
-          val result = k.isAssignableFrom(eventWithSender.event.getClass)
-          result
-      }.foreach {
-        case (_, v) =>
-          v.foreach { ref =>
-            ref ! eventWithSender
-          }
-      }
+      eventStream.publish(eventWithSender)
     }
 
     override def unsubscribe(subscriber: ActorRef, from: Classifier): Boolean = {
-      subscribers.remove(from).isDefined
+      eventStream.unsubscribe(subscriber, from)
     }
 
     override def unsubscribe(subscriber: ActorRef): Unit = {
-      val newMap = subscribers.map { case (k, v) => (k, v.filterNot(_ == subscriber)) }
-      subscribers ++= newMap
+      eventStream.unsubscribe(subscriber)
     }
   }
 
   def ofLocal(system: ActorSystem): EventBus = new EventBusOnLocal(system)
+
   def ofRemote(system: ActorSystem): EventBus = new EventBusOnRemote(system)
 
 }
