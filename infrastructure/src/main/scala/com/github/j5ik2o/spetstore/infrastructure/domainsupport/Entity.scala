@@ -1,11 +1,13 @@
 package com.github.j5ik2o.spetstore.infrastructure.domainsupport
 
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.UpdateEvent
+
 /**
  * DDDのエンティティ責務を表すトレイト。
  *
  * @tparam ID [[Identifier]]
  */
-trait Entity[ID <: Identifier[_]] {
+trait Entity[ID <: EntityId] {
 
   /**
    * 識別子。
@@ -21,19 +23,19 @@ trait Entity[ID <: Identifier[_]] {
 
 }
 
-trait EntityWithState[ID <: Identifier[_]] extends Entity[ID] {
+trait EntityWithState[ID <: EntityId] extends Entity[ID] {
 
   type This <: EntityWithState[ID]
 
-  type Event <: UpdateEvent
+  type Event <: UpdateEvent[ID]
 
-  type StateMachine = PartialFunction[UpdateEvent, This]
+  type StateMachine = PartialFunction[Event, This]
 
   def updateState: StateMachine
 
 }
 
-trait BaseEntity[ID <: Identifier[_]] extends EntityWithState[ID] {
+trait BaseEntity[ID <: EntityId] extends EntityWithState[ID] {
 
   val version: Option[Long]
 

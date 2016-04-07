@@ -1,7 +1,11 @@
 package com.github.j5ik2o.spetstore.infrastructure.domainsupport
 
-trait EntityFactory[ID <: Identifier[_], E <: EntityWithState[ID]] {
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.CreateEvent
 
-  def createFromEvent: PartialFunction[CreateEvent, E]
+trait EntityFactory[ID <: EntityId, E <: EntityWithState[ID]] {
+
+  type Event <: CreateEvent[ID]
+
+  def createFromEvent: PartialFunction[Event, E]
 
 }
