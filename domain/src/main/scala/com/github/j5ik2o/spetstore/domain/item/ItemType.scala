@@ -1,22 +1,48 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
+import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.InventoryEvent
+import com.github.j5ik2o.spetstore.domain.item.ItemTypeAggregateProtocol.Update.{DescriptionUpdated, ItemTypeUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
-trait ItemTypeEvent extends Event
+object ItemTypeAggregateProtocol extends EntityProtocol {
+  override type Id = ItemTypeId
+  override type CommandRequest = ItemTypeCommandRequest
+  override type CommandResponse = ItemTypeCommandResponse
+  override type Event = ItemTypeEvent
+  override type QueryRequest = ItemTypeQueryRequest
+  override type QueryResponse = ItemTypeQueryResponse
 
-trait ItemTypeCreateEvent extends InventoryEvent with CreateEvent
-trait ItemTypeUpdateEvent extends InventoryEvent with UpdateEvent
+  sealed trait ItemTypeCommandRequest extends EntityProtocol.CommandRequest[Id]
 
-object ItemTypeEvent {
+  sealed trait ItemTypeCommandResponse extends EntityProtocol.CommandResponse[Id]
 
-  case class NameUpdated(id: EventId, entityId: ItemTypeId, name: String)
-    extends ItemTypeUpdateEvent
+  sealed trait ItemTypeEvent extends EntityProtocol.Event[Id]
 
-  case class DescriptionUpdated(id: EventId, entityId: ItemTypeId, description: Option[String])
-    extends ItemTypeUpdateEvent
+  sealed trait ItemTypeQueryRequest extends EntityProtocol.QueryRequest[Id]
+
+  sealed trait ItemTypeQueryResponse extends EntityProtocol.QueryResponse[Id]
+
+  object Create {
+
+    trait ItemTypeCreateEvent extends ItemTypeEvent with EntityProtocol.CreateEvent[Id]
+
+  }
+  object Update {
+
+    trait ItemTypeUpdateEvent extends ItemTypeEvent with EntityProtocol.UpdateEvent[Id]
+
+    case class NameUpdated(id: EventId, entityId: ItemTypeId, name: String)
+      extends ItemTypeUpdateEvent
+
+    case class DescriptionUpdated(id: EventId, entityId: ItemTypeId, description: Option[String])
+      extends ItemTypeUpdateEvent
+
+  }
 
 }
+
 
 /**
  * 商品の種類を表すエンティティ。
@@ -44,10 +70,10 @@ case class ItemType(
     copy(version = Some(version))
 
   override def updateState: StateMachine = {
-    case ItemTypeEvent.NameUpdated(_, entityId, value) =>
+    case NameUpdated(_, entityId, value) =>
       require(entityId == id)
       copy(name = value)
-    case ItemTypeEvent.DescriptionUpdated(_, entityId, value) =>
+    case DescriptionUpdated(_, entityId, value) =>
       require(entityId == id)
       copy(description = value)
   }

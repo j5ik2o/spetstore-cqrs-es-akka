@@ -1,17 +1,42 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
+import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Update.{ItemUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
-trait ItemEvent extends Event
+object ItemAggregateProtocol extends EntityProtocol {
+  override type Id = ItemId
+  override type CommandRequest = ItemCommandRequest
+  override type CommandResponse = ItemCommandResponse
+  override type Event = ItemEvent
+  override type QueryRequest = ItemQueryRequest
+  override type QueryResponse = ItemQueryResponse
 
-trait ItemCreateEvent extends ItemEvent with CreateEvent
-trait ItemUpdateEvent extends ItemEvent with UpdateEvent
+  sealed trait ItemCommandRequest extends EntityProtocol.CommandRequest[Id]
 
-object ItemEvent {
+  sealed trait ItemCommandResponse extends EntityProtocol.CommandResponse[Id]
 
-  case class NameUpdated(id: EventId, entityid: ItemId, name: String)
-    extends ItemUpdateEvent
+  sealed trait ItemEvent extends EntityProtocol.Event[Id]
+
+  sealed trait ItemQueryRequest extends EntityProtocol.QueryRequest[Id]
+
+  sealed trait ItemQueryResponse extends EntityProtocol.QueryResponse[Id]
+
+  object Create {
+
+    trait ItemCreateEvent extends ItemEvent with EntityProtocol.CreateEvent[Id]
+
+  }
+
+  object Update {
+
+    trait ItemUpdateEvent extends ItemEvent with EntityProtocol.UpdateEvent[Id]
+
+    case class NameUpdated(id: EventId, entityId: Id, name: String)
+      extends ItemUpdateEvent
+
+  }
 
 }
 
@@ -43,7 +68,7 @@ case class Item(
   override def withVersion(version: Long): Entity[ItemId] = copy(version = Some(version))
 
   override def updateState: StateMachine = {
-    case ItemEvent.NameUpdated(_, _, value) => copy(name = value)
+    case NameUpdated(_, _, value) => copy(name = value)
   }
 
 }

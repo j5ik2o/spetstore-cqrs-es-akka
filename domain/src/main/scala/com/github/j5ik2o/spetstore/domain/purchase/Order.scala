@@ -1,24 +1,51 @@
 package com.github.j5ik2o.spetstore.domain.purchase
 
-import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
+import com.github.j5ik2o.spetstore.domain.basic.{Contact, PostalAddress, StatusType}
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 import com.github.j5ik2o.spetstore.domain.model.purchase.OrderStatus
+import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.OrderEvent.{CustomerNameUpdated, OrderUpdateEvent}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 import org.joda.time.DateTime
 
 import scala.collection.mutable.ListBuffer
 
-trait OrderEvent extends Event
+object OrderAggregateProtocol extends EntityProtocol {
 
-trait OrderCreateEvent extends OrderEvent with CreateEvent
-trait OrderUpdateEvent extends OrderEvent with UpdateEvent
+  override type Id = OrderId
+  override type CommandRequest = OrderCommandRequest
+  override type CommandResponse = OrderCommandResponse
+  override type Event = OrderEvent
+  override type QueryRequest = OrderQueryRequest
+  override type QueryResponse = OrderQueryResponse
 
-object OrderEvent {
+  sealed trait OrderCommandRequest extends EntityProtocol.CommandRequest[Id]
 
-  case class CustomerNameUpdated(id: EventId, entityId: OrderId, name: String)
-    extends OrderUpdateEvent
+  sealed trait OrderCommandResponse extends EntityProtocol.CommandResponse[Id]
+
+  sealed trait OrderEvent extends EntityProtocol.Event[Id]
+
+  sealed trait OrderQueryRequest extends EntityProtocol.QueryRequest[Id]
+
+  sealed trait OrderQueryResponse extends EntityProtocol.QueryResponse[Id]
+
+  object Create {
+
+    trait OrderCreateEvent extends OrderEvent with EntityProtocol.CreateEvent[Id]
+
+  }
+
+  object OrderEvent {
+
+    trait OrderUpdateEvent extends OrderEvent with EntityProtocol.UpdateEvent[Id]
+
+    case class CustomerNameUpdated(id: EventId, entityId: Id, name: String)
+      extends OrderUpdateEvent
+
+  }
 
 }
+
 
 /**
  * 注文を表すエンティティ。
@@ -49,7 +76,7 @@ case class Order(
   override type Event = OrderUpdateEvent
 
   override def updateState: StateMachine = {
-    case OrderEvent.CustomerNameUpdated(_, entityId, value) =>
+    case CustomerNameUpdated(_, entityId, value) =>
       require(id == entityId)
       copy(customerName = value)
   }

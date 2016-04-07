@@ -1,35 +1,62 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
+import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.Update.{InventoryUpdateEvent, QuantityUpdated}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
-trait InventoryEvent extends Event
+object InventoryAggregateProtocol extends EntityProtocol {
 
-trait InventoryCreateEvent extends InventoryEvent with CreateEvent
-trait InventoryUpdateEvent extends InventoryEvent with UpdateEvent
+  override type Id = InventoryId
+  override type CommandRequest = InventoryCommandRequest
+  override type CommandResponse = InventoryCommandResponse
+  override type Event = InventoryEvent
+  override type QueryRequest = InventoryQueryRequest
+  override type QueryResponse = InventoryQueryResponse
 
-object InventoryEvent {
+  sealed trait InventoryCommandRequest extends EntityProtocol.CommandRequest[Id]
 
-  case class QuantityUpdated(id: EventId, entityId: InventoryId, quantity: Int)
-    extends InventoryUpdateEvent
+  sealed trait InventoryCommandResponse extends EntityProtocol.CommandResponse[Id]
+
+  sealed trait InventoryEvent extends EntityProtocol.Event[Id]
+
+  sealed trait InventoryQueryRequest extends EntityProtocol.QueryRequest[Id]
+
+  sealed trait InventoryQueryResponse extends EntityProtocol.QueryResponse[Id]
+
+
+  object Create {
+
+    trait InventoryCreateEvent extends InventoryEvent with EntityProtocol.CreateEvent[Id]
+
+  }
+
+  object Update {
+
+    trait InventoryUpdateEvent extends InventoryEvent with EntityProtocol.UpdateEvent[Id]
+
+    case class QuantityUpdated(id: EventId, entityId: InventoryId, quantity: Int)
+      extends InventoryUpdateEvent
+
+  }
 
 }
 
 /**
- * 在庫を表すエンティティ。
- *
- * @param id       [[InventoryId]]
- * @param itemId   [[ItemId]]
- * @param quantity 在庫数量
- */
+  * 在庫を表すエンティティ。
+  *
+  * @param id       [[InventoryId]]
+  * @param itemId   [[ItemId]]
+  * @param quantity 在庫数量
+  */
 case class Inventory(
-  id:       InventoryId,
-  status:   StatusType.Value,
-  itemId:   ItemId,
-  quantity: Int,
-  version:  Option[Long]
-)
-    extends BaseEntity[InventoryId] {
+                      id: InventoryId,
+                      status: StatusType.Value,
+                      itemId: ItemId,
+                      quantity: Int,
+                      version: Option[Long]
+                    )
+  extends BaseEntity[InventoryId] {
 
   override type This = Inventory
 
@@ -39,7 +66,7 @@ case class Inventory(
     copy(version = Some(version))
 
   override def updateState: StateMachine = {
-    case InventoryEvent.QuantityUpdated(_, entityId, value) =>
+    case QuantityUpdated(_, entityId, value) =>
       require(entityId == id)
       copy(quantity = value)
   }

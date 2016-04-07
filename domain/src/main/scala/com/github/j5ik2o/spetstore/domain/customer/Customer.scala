@@ -2,128 +2,143 @@ package com.github.j5ik2o.spetstore.domain.customer
 
 import java.util.UUID
 
-import com.github.j5ik2o.spetstore.domain.basic.{ SexType, StatusType }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
+import com.github.j5ik2o.spetstore.domain.basic.{SexType, StatusType}
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.CustomerCreated
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{CustomerUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{BaseEntity, Entity, EntityFactory, EntityProtocol}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol._
 
-sealed trait CustomerCommandRequest extends CommandRequest[CustomerId] {
 
-}
+object CustomerAggregateProtocol extends EntityProtocol {
+  override type Id = CustomerId
+  override type CommandRequest = CustomerCommandRequest
+  override type CommandResponse = CustomerCommandResponse
+  override type Event = CustomerEvent
+  override type QueryRequest = CustomerQueryRequest
+  override type QueryResponse = CustomerQueryResponse
 
-trait CustomerCreateCommandRequest extends CustomerCommandRequest with CreateCommandRequest[CustomerId] {
-  override def toEvent: CustomerCreateEvent
-}
+  sealed trait CustomerCommandRequest extends EntityProtocol.CommandRequest[CustomerId]
 
-trait CustomerUpdateCommandRequest extends CustomerCommandRequest with UpdateCommandRequest[CustomerId] {
-  override def toEvent: CustomerUpdateEvent
-}
+  sealed trait CustomerCommandResponse extends EntityProtocol.CommandResponse[CustomerId]
 
-trait CustomerGetCommandRequest extends CustomerCommandRequest with GetCommandRequest[CustomerId]
+  sealed trait CustomerEvent extends EntityProtocol.Event[CustomerId]
 
-object CustomerCommandRequest {
+  sealed trait CustomerQueryRequest extends EntityProtocol.QueryRequest[CustomerId]
 
-  case class CreateCustomer(
-    id:       CommandRequestId,
-    entityId: CustomerId,
-    status:   StatusType.Value,
-    name:     String,
-    sexType:  SexType.Value,
-    profile:  CustomerProfile,
-    config:   CustomerConfig,
-    version:  Option[Long]
-  )
+  sealed trait CustomerQueryResponse extends EntityProtocol.QueryResponse[CustomerId]
+
+  object Create {
+
+    trait CustomerCreateCommandRequest extends CustomerCommandRequest with EntityProtocol.CreateCommandRequest[CustomerId] {
+      override def toEvent: CustomerCreateEvent
+    }
+
+    case class CreateCustomer(
+                               id: CommandRequestId,
+                               entityId: CustomerId,
+                               status: StatusType.Value,
+                               name: String,
+                               sexType: SexType.Value,
+                               profile: CustomerProfile,
+                               config: CustomerConfig,
+                               version: Option[Long]
+                             )
       extends CustomerCreateCommandRequest {
-    override def toEvent: CustomerEvent.CustomerCreated = CustomerEvent.CustomerCreated(
-      EventId(UUID.randomUUID()),
-      entityId,
-      status,
-      name,
-      sexType,
-      profile,
-      config,
-      version
-    )
-  }
+      override def toEvent: CustomerCreated = CustomerCreated(
+        EventId(UUID.randomUUID()),
+        entityId,
+        status,
+        name,
+        sexType,
+        profile,
+        config,
+        version
+      )
+    }
 
-  case class UpdateName(id: CommandRequestId, entityId: CustomerId, name: String) extends CustomerUpdateCommandRequest {
-    override def toEvent: CustomerUpdateEvent = CustomerEvent.NameUpdated(EventId(UUID.randomUUID()), name)
-  }
+    case class CreateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId)
+      extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
 
-  case class GetCustomer(id: CommandRequestId, entityId: CustomerId) extends CustomerGetCommandRequest
+    case class CreateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId, throwable: Throwable)
+      extends CommandFailed[CustomerId]
 
-}
+    trait CustomerCreateEvent extends CustomerEvent with CreateEvent[CustomerId]
 
-trait CustomerCommandResponse extends CommandResponse
-
-object CustomerCommandResponse {
-
-  case class CreateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entity: Customer)
-    extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
-
-  case class CreateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, throwable: Throwable)
-    extends CommandFailed
-
-  case class UpdateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entity: Customer)
-    extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
-
-  case class UpdateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, throwable: Throwable)
-    extends CustomerCommandResponse with CommandFailed
-
-  case class GetSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entity: Customer)
-    extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
-
-  case class GetFailed(id: CommandResponseId, commandRequestId: CommandRequestId, throwable: Throwable)
-    extends CustomerCommandResponse with CommandFailed
-
-}
-
-sealed trait CustomerEvent extends Event
-
-trait CustomerCreateEvent extends CustomerEvent with CreateEvent
-
-trait CustomerUpdateEvent extends CustomerEvent with UpdateEvent
-
-object CustomerEvent {
-
-  case class NameUpdated(id: EventId, name: String) extends CustomerUpdateEvent
-
-  case class CustomerCreated(id: EventId, customerId: CustomerId,
-                             status:  StatusType.Value,
-                             name:    String,
-                             sexType: SexType.Value,
-                             profile: CustomerProfile,
-                             config:  CustomerConfig,
-                             version: Option[Long])
+    case class CustomerCreated(id: EventId,
+                               entityId: CustomerId,
+                               status: StatusType.Value,
+                               name: String,
+                               sexType: SexType.Value,
+                               profile: CustomerProfile,
+                               config: CustomerConfig,
+                               version: Option[Long])
       extends CustomerCreateEvent
 
+  }
+
+  object Update {
+
+    trait CustomerUpdateCommandRequest extends CustomerCommandRequest with EntityProtocol.UpdateCommandRequest[CustomerId] {
+      override def toEvent: CustomerUpdateEvent
+    }
+
+    case class UpdateName(id: CommandRequestId, entityId: CustomerId, name: String) extends CustomerUpdateCommandRequest {
+      override def toEvent: CustomerUpdateEvent = NameUpdated(EventId(UUID.randomUUID()), entityId, name)
+    }
+
+    case class UpdateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId)
+      extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
+
+    case class UpdateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId, throwable: Throwable)
+      extends CustomerCommandResponse with CommandFailed[CustomerId]
+
+    trait CustomerUpdateEvent extends CustomerEvent with UpdateEvent[CustomerId]
+
+    case class NameUpdated(id: EventId, entityId: CustomerId, name: String) extends CustomerUpdateEvent
+
+  }
+
+  object Delete {
+
+  }
+
+  object Query {
+
+  }
+
 }
 
+
 object Customer extends EntityFactory[CustomerId, Customer] {
-  override def createFromEvent: PartialFunction[CreateEvent, Customer] = {
-    case CustomerEvent.CustomerCreated(_, customerId, status, name, sexType, profile, config, version) =>
+
+  override type Event = CustomerCreated
+
+  override def createFromEvent: PartialFunction[CustomerCreated, Customer] = {
+    case CustomerCreated(_, customerId, status, name, sexType, profile, config, version) =>
       new Customer(customerId, status, name, sexType, profile, config, version)
   }
 }
 
 /**
- * ペットストアの顧客を表すエンティティ。
- *
- * @param id      識別子
- * @param status  [[StatusType]]
- * @param name    名前
- * @param sexType 性別
- * @param profile [[CustomerProfile]]
- * @param config  [[CustomerConfig]]
- */
+  * ペットストアの顧客を表すエンティティ。
+  *
+  * @param id      識別子
+  * @param status  [[StatusType]]
+  * @param name    名前
+  * @param sexType 性別
+  * @param profile [[CustomerProfile]]
+  * @param config  [[CustomerConfig]]
+  */
 case class Customer(
-  id:      CustomerId,
-  status:  StatusType.Value,
-  name:    String,
-  sexType: SexType.Value,
-  profile: CustomerProfile,
-  config:  CustomerConfig,
-  version: Option[Long]
-)
-    extends BaseEntity[CustomerId] {
+                     id: CustomerId,
+                     status: StatusType.Value,
+                     name: String,
+                     sexType: SexType.Value,
+                     profile: CustomerProfile,
+                     config: CustomerConfig,
+                     version: Option[Long]
+                   )
+  extends BaseEntity[CustomerId] {
 
   override type This = Customer
 
@@ -135,7 +150,9 @@ case class Customer(
   override def withVersion(version: Long): Entity[CustomerId] = copy(version = Some(version))
 
   override def updateState: StateMachine = {
-    case CustomerEvent.NameUpdated(_, value) => withName(value)
+    case NameUpdated(_, entityId, value) =>
+      require(entityId == id)
+      withName(value)
   }
 
 }

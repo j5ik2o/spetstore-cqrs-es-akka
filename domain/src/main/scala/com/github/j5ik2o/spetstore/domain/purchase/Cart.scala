@@ -3,75 +3,101 @@ package com.github.j5ik2o.spetstore.domain.purchase
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 import com.github.j5ik2o.spetstore.domain.item.ItemId
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
+import com.github.j5ik2o.spetstore.domain.purchase.CartAggregateProtocol.Update.{CartItemsAdded, CartItemsRemoved, CartUpdateEvent}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{BaseEntity, Entity, EntityProtocol}
 
-trait CartEvent extends Event
-trait CartCreateEvent extends CartEvent with CreateEvent
-trait CartUpdateEvent extends CartEvent with UpdateEvent
+object CartAggregateProtocol extends EntityProtocol {
+  override type Id = CartId
+  override type CommandRequest = CartCommandRequest
+  override type CommandResponse = CartCommandResponse
+  override type Event = CartEvent
+  override type QueryRequest = CartQueryRequest
+  override type QueryResponse = CartQueryResponse
 
-object CartEvent {
+  sealed trait CartCommandRequest extends EntityProtocol.CommandRequest[Id]
 
-  case class CartItemsAdded(id: EventId, entityId: CartId, cartItems: Seq[CartItem])
-    extends CartUpdateEvent
+  sealed trait CartCommandResponse extends EntityProtocol.CommandResponse[Id]
 
-  case class CartItemsRemoved(id: EventId, entityId: CartId, cartItemIds: Seq[CartItemId])
-    extends CartUpdateEvent
+  sealed trait CartEvent extends EntityProtocol.Event[Id]
+
+  sealed trait CartQueryRequest extends EntityProtocol.QueryRequest[Id]
+
+  sealed trait CartQueryResponse extends EntityProtocol.QueryResponse[Id]
+
+  object Create {
+
+    trait CartCreateEvent extends CartEvent with EntityProtocol.CreateEvent[Id]
+
+  }
+
+  object Update {
+
+    trait CartUpdateEvent extends CartEvent with EntityProtocol.UpdateEvent[Id]
+
+    case class CartItemsAdded(id: EntityProtocol.EventId, entityId: CartId, cartItems: Seq[CartItem])
+      extends CartUpdateEvent
+
+    case class CartItemsRemoved(id: EntityProtocol.EventId, entityId: CartId, cartItemIds: Seq[CartItemId])
+      extends CartUpdateEvent
+
+
+  }
 
 }
 
 /**
- * ショッピングカートを表すエンティティ。
- *
- * @param cartItems [[CartItem]]のリスト
- */
+  * ショッピングカートを表すエンティティ。
+  *
+  * @param cartItems [[CartItem]]のリスト
+  */
 case class Cart(
-    id:         CartId,
-    status:     StatusType.Value,
-    customerId: CustomerId,
-    cartItems:  List[CartItem],
-    version:    Option[Long]
-) extends BaseEntity[CartId] {
+                 id: CartId,
+                 status: StatusType.Value,
+                 customerId: CustomerId,
+                 cartItems: List[CartItem],
+                 version: Option[Long]
+               ) extends BaseEntity[CartId] {
 
   override type This = Cart
 
   override type Event = CartUpdateEvent
 
   override def updateState: StateMachine = {
-    case CartEvent.CartItemsAdded(_, entityId, values) =>
+    case CartItemsAdded(_, entityId, values) =>
       require(id == entityId)
       copy(cartItems = cartItems ++ values)
-    case CartEvent.CartItemsRemoved(_, entityId, values) =>
+    case CartItemsRemoved(_, entityId, values) =>
       require(id == entityId)
       copy(cartItems = cartItems.filterNot { e => values.contains(e) })
   }
 
   /**
-   * [[CartItem]]の個数。
-   */
+    * [[CartItem]]の個数。
+    */
   val sizeOfCartItems = cartItems.size
 
   /**
-   * [[CartItem]]の総数。
-   */
+    * [[CartItem]]の総数。
+    */
   val quantityOfCartItems = cartItems.foldLeft(0)(_ + _.quantity)
 
   /**
-   * [[ItemId]]が含まれるかを検証する。
-   *
-   * @param itemId [[ItemId]]
-   * @return 含まれる場合はtrue
-   */
+    * [[ItemId]]が含まれるかを検証する。
+    *
+    * @param itemId [[ItemId]]
+    * @return 含まれる場合はtrue
+    */
   def containsItemId(itemId: ItemId): Boolean =
     cartItems.exists {
       _.itemId == itemId
     }
 
   /**
-   * このカートに[[CartItem]]を追加する。
-   *
-   * @param cartItem [[CartItem]]
-   * @return 新しい[[Cart]]
-   */
+    * このカートに[[CartItem]]を追加する。
+    *
+    * @param cartItem [[CartItem]]
+    * @return 新しい[[Cart]]
+    */
   def addCartItem(cartItem: CartItem): Cart = {
     require(cartItem.quantity > 0)
     cartItems.find(_.itemId == cartItem.itemId).map {
@@ -84,13 +110,13 @@ case class Cart(
   }
 
   /**
-   * このカートに[[CartItem]]を追加する。
-   *
-   * @param itemId    [[ItemId]]
-   * @param quantity  個数
-   * @param isInStock ストックする場合true
-   * @return 新しい[[Cart]]
-   */
+    * このカートに[[CartItem]]を追加する。
+    *
+    * @param itemId    [[ItemId]]
+    * @param quantity  個数
+    * @param isInStock ストックする場合true
+    * @return 新しい[[Cart]]
+    */
   def addCartItem(cartItemId: CartItemId, itemId: ItemId, quantity: Int, isInStock: Boolean = false): Cart =
     addCartItem(CartItem(cartItemId, StatusType.Enabled, cartItems.size + 1, itemId, quantity, isInStock, None))
 
@@ -100,13 +126,13 @@ case class Cart(
     )
 
   /**
-   * [[ItemId]]を使って
-   * [[CartItem]]を
-   * 削除する。
-   *
-   * @param itemId [[ItemId]]
-   * @return 新しい[[Cart]]
-   */
+    * [[ItemId]]を使って
+    * [[CartItem]]を
+    * 削除する。
+    *
+    * @param itemId [[ItemId]]
+    * @return 新しい[[Cart]]
+    */
   def removeCartItemByItemId(itemId: ItemId): Cart =
     cartItems.find(_.itemId == itemId).map {
       e =>
@@ -114,12 +140,12 @@ case class Cart(
     }.getOrElse(this)
 
   /**
-   * 特定の[[CartItem]]の数量を
-   * インクリメントする。
-   *
-   * @param itemId [[ItemId]]
-   * @return 新しい[[Cart]]
-   */
+    * 特定の[[CartItem]]の数量を
+    * インクリメントする。
+    *
+    * @param itemId [[ItemId]]
+    * @return 新しい[[Cart]]
+    */
   def incrementQuantityByItemId(itemId: ItemId): Cart =
     cartItems.find(_.itemId == itemId).map {
       cartItem =>
@@ -128,12 +154,12 @@ case class Cart(
     }.getOrElse(this)
 
   /**
-   * 特定の[[CartItem]]の数量を更新する。
-   *
-   * @param itemId   [[ItemId]]
-   * @param quantity 数量
-   * @return 新しい[[Cart]]
-   */
+    * 特定の[[CartItem]]の数量を更新する。
+    *
+    * @param itemId   [[ItemId]]
+    * @param quantity 数量
+    * @return 新しい[[Cart]]
+    */
   def updateQuantityByItemId(itemId: ItemId, quantity: Int): Cart = {
     require(quantity > 0)
     cartItems.find(_.itemId == itemId).map {
