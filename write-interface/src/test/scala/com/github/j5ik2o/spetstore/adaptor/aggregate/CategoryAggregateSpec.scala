@@ -27,7 +27,7 @@ class CategoryAggregateSpec extends TestKit(ActorSystem("CategoryAggregateSpec",
     TestKit.shutdownActorSystem(system)
   }
 
-  describe("CategoryAggregateSpec") {
+  describe("CategoryAggregate") {
     it("生成できること") {
       val id = CategoryId()
       val name = "a"
