@@ -2,7 +2,7 @@ package com.github.j5ik2o.spetstore.domain.customer
 
 import java.util.UUID
 
-import com.github.j5ik2o.spetstore.domain.basic.{SexType, StatusType}
+import com.github.j5ik2o.spetstore.domain.basic.StatusType
 import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{CustomerCreateEvent, CustomerCreated}
 import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{CustomerUpdateEvent, NameUpdated}
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport
@@ -37,8 +37,6 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
                                id: EntityProtocol.CommandRequestId,
                                entityId: CustomerId,
                                status: StatusType.Value,
-                               name: String,
-                               sexType: SexType.Value,
                                profile: CustomerProfile,
                                config: CustomerConfig,
                                version: Option[Long]
@@ -48,8 +46,6 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
         EntityProtocol.EventId(UUID.randomUUID()),
         entityId,
         status,
-        name,
-        sexType,
         profile,
         config,
         version
@@ -67,8 +63,6 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
     case class CustomerCreated(id: EntityProtocol.EventId,
                                entityId: CustomerId,
                                status: StatusType.Value,
-                               name: String,
-                               sexType: SexType.Value,
                                profile: CustomerProfile,
                                config: CustomerConfig,
                                version: Option[Long])
@@ -117,8 +111,8 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
 object Customer extends EntityFactory[CustomerId, Customer, CustomerCreateEvent, CustomerUpdateEvent] {
 
   override def createFromEvent: PartialFunction[CustomerCreateEvent, Customer] = {
-    case CustomerCreated(_, customerId, status, name, sexType, profile, config, version) =>
-      new Customer(customerId, status, name, sexType, profile, config, version)
+    case CustomerCreated(_, customerId, status, profile, config, version) =>
+      new Customer(customerId, status, profile, config, version)
   }
 }
 
@@ -127,16 +121,12 @@ object Customer extends EntityFactory[CustomerId, Customer, CustomerCreateEvent,
   *
   * @param id      識別子
   * @param status  [[StatusType]]
-  * @param name    名前
-  * @param sexType 性別
   * @param profile [[CustomerProfile]]
   * @param config  [[CustomerConfig]]
   */
 case class Customer(
                      id: CustomerId,
                      status: StatusType.Value,
-                     name: String,
-                     sexType: SexType.Value,
                      profile: CustomerProfile,
                      config: CustomerConfig,
                      version: Option[Long]
@@ -145,15 +135,12 @@ case class Customer(
 
   override type This = Customer
 
-  def withName(value: String): Customer =
-    copy(name = value)
-
   override def withVersion(version: Long): Entity[CustomerId] = copy(version = Some(version))
 
   override def updateState: StateMachine = {
     case NameUpdated(_, entityId, value) =>
       require(entityId == id)
-      withName(value)
+      copy(profile = profile.copy(name = value))
   }
 
 }
