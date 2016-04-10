@@ -3,11 +3,10 @@ package com.github.j5ik2o.spetstore.domain.customer
 import java.util.UUID
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{CustomerCreateEvent, CustomerCreated}
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{CustomerUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{ CustomerCreateEvent, CustomerCreated }
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{ CustomerUpdateEvent, NameUpdated }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{BaseEntity, Entity, EntityFactory, EntityProtocol}
-
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ BaseEntity, Entity, EntityFactory, EntityProtocol }
 
 object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
   type Id = CustomerId
@@ -34,14 +33,14 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
     }
 
     case class CreateCustomer(
-                               id: EntityProtocol.CommandRequestId,
-                               entityId: CustomerId,
-                               status: StatusType.Value,
-                               profile: CustomerProfile,
-                               config: CustomerConfig,
-                               version: Option[Long]
-                             )
-      extends CustomerCreateCommandRequest {
+      id:       EntityProtocol.CommandRequestId,
+      entityId: CustomerId,
+      status:   StatusType.Value,
+      profile:  CustomerProfile,
+      config:   CustomerConfig,
+      version:  Option[Long]
+    )
+        extends CustomerCreateCommandRequest {
       override def toEvent: CustomerCreated = CustomerCreated(
         EntityProtocol.EventId(UUID.randomUUID()),
         entityId,
@@ -60,35 +59,37 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
 
     trait CustomerCreateEvent extends CustomerEvent with EntityProtocol.CreateEvent[CustomerId]
 
-    case class CustomerCreated(id: EntityProtocol.EventId,
-                               entityId: CustomerId,
-                               status: StatusType.Value,
-                               profile: CustomerProfile,
-                               config: CustomerConfig,
-                               version: Option[Long])
-      extends CustomerCreateEvent
+    case class CustomerCreated(
+      id:       EntityProtocol.EventId,
+      entityId: CustomerId,
+      status:   StatusType.Value,
+      profile:  CustomerProfile,
+      config:   CustomerConfig,
+      version:  Option[Long]
+    )
+        extends CustomerCreateEvent
 
   }
 
   object Update {
 
-    trait CustomerUpdateCommandRequest extends CustomerCommandRequest with EntityProtocol.UpdateCommandRequest[CustomerId] {
+    trait CustomerUpdateCommandRequest extends CustomerCommandRequest with EntityProtocol.UpdateCommandRequest[Id] {
       override def toEvent: CustomerUpdateEvent
     }
 
-    case class UpdateName(id: EntityProtocol.CommandRequestId, entityId: CustomerId, name: String) extends CustomerUpdateCommandRequest {
+    case class UpdateName(id: EntityProtocol.CommandRequestId, entityId: Id, name: String) extends CustomerUpdateCommandRequest {
       override def toEvent: CustomerUpdateEvent = NameUpdated(EntityProtocol.EventId(UUID.randomUUID()), entityId, name)
     }
 
-    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId)
-      extends CustomerCommandResponse with EntityProtocol.CommandSucceeded[CustomerId, Customer]
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends CustomerCommandResponse with EntityProtocol.CommandSucceeded[Id, Customer]
 
-    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId, throwable: Throwable)
-      extends CustomerCommandResponse with EntityProtocol.CommandFailed[CustomerId]
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends CustomerCommandResponse with EntityProtocol.CommandFailed[Id]
 
-    trait CustomerUpdateEvent extends CustomerEvent with EntityProtocol.UpdateEvent[CustomerId]
+    trait CustomerUpdateEvent extends CustomerEvent with EntityProtocol.UpdateEvent[Id]
 
-    case class NameUpdated(id: EntityProtocol.EventId, entityId: CustomerId, name: String) extends CustomerUpdateEvent
+    case class NameUpdated(id: EntityProtocol.EventId, entityId: Id, name: String) extends CustomerUpdateEvent
 
   }
 
@@ -107,7 +108,6 @@ object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
 
 }
 
-
 object Customer extends EntityFactory[CustomerId, Customer, CustomerCreateEvent, CustomerUpdateEvent] {
 
   override def createFromEvent: PartialFunction[CustomerCreateEvent, Customer] = {
@@ -117,21 +117,21 @@ object Customer extends EntityFactory[CustomerId, Customer, CustomerCreateEvent,
 }
 
 /**
-  * ペットストアの顧客を表すエンティティ。
-  *
-  * @param id      識別子
-  * @param status  [[StatusType]]
-  * @param profile [[CustomerProfile]]
-  * @param config  [[CustomerConfig]]
-  */
+ * ペットストアの顧客を表すエンティティ。
+ *
+ * @param id      識別子
+ * @param status  [[StatusType]]
+ * @param profile [[CustomerProfile]]
+ * @param config  [[CustomerConfig]]
+ */
 case class Customer(
-                     id: CustomerId,
-                     status: StatusType.Value,
-                     profile: CustomerProfile,
-                     config: CustomerConfig,
-                     version: Option[Long]
-                   )
-  extends BaseEntity[CustomerId, CustomerUpdateEvent] {
+  id:      CustomerId,
+  status:  StatusType.Value,
+  profile: CustomerProfile,
+  config:  CustomerConfig,
+  version: Option[Long]
+)
+    extends BaseEntity[CustomerId, CustomerUpdateEvent] {
 
   override type This = Customer
 

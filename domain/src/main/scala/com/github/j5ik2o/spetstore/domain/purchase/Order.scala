@@ -1,9 +1,9 @@
 package com.github.j5ik2o.spetstore.domain.purchase
 
-import com.github.j5ik2o.spetstore.domain.basic.{Contact, PostalAddress, StatusType}
+import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 import com.github.j5ik2o.spetstore.domain.model.purchase.OrderStatus
-import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.OrderEvent.{CustomerNameUpdated, OrderUpdateEvent}
+import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.OrderEvent.{ CustomerNameUpdated, OrderUpdateEvent }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 import org.joda.time.DateTime
@@ -45,7 +45,6 @@ object OrderAggregateProtocol extends EntityProtocol {
   }
 
 }
-
 
 /**
  * 注文を表すエンティティ。

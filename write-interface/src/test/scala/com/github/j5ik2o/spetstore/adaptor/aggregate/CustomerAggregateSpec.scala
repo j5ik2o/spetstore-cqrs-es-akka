@@ -1,17 +1,17 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import akka.testkit.{ ImplicitSender, TestActorRef, TestKit }
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
 import com.github.j5ik2o.spetstore.domain.basic._
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{CreateCustomer, CreateSucceeded}
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Query.{GetStateRequest, GetStateResponse}
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{UpdateName, UpdateSucceeded}
-import com.github.j5ik2o.spetstore.domain.customer.{CustomerConfig, CustomerId, CustomerProfile}
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{ CreateCustomer, CreateSucceeded }
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Query.{ GetStateRequest, GetStateResponse }
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{ UpdateName, UpdateSucceeded }
+import com.github.j5ik2o.spetstore.domain.customer.{ CustomerConfig, CustomerId, CustomerProfile }
 import com.github.j5ik2o.spetstore.domain.item.CategoryId
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{CommandRequestId, QueryRequestId}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, QueryRequestId }
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{BeforeAndAfterAll, FunSpecLike}
+import org.scalatest.{ BeforeAndAfterAll, FunSpecLike }
 
 class CustomerAggregateSpec extends TestKit(ActorSystem("CustomerAggregateSpec", ConfigFactory.parseString(
   """

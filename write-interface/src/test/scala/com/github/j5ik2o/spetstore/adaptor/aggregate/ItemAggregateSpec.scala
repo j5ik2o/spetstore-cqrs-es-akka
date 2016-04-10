@@ -3,23 +3,23 @@ package com.github.j5ik2o.spetstore.adaptor.aggregate
 import akka.actor.ActorSystem
 import akka.testkit.{ ImplicitSender, TestActorRef, TestKit }
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
-import com.github.j5ik2o.spetstore.domain.basic.StatusType
-import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Create.{ CreateCategory, CreateSucceeded }
-import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Query.{ GetStateRequest, GetStateResponse }
-import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Update.{ UpdateName, UpdateSucceeded }
-import com.github.j5ik2o.spetstore.domain.item.CategoryId
+import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Create.{ CreateItem, CreateSucceeded }
+import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Query.{ GetStateRequest, GetStateResponse }
+import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Update.{ UpdateName, UpdateSucceeded }
+import com.github.j5ik2o.spetstore.domain.item.{ ItemId, ItemTypeId, SupplierId }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, QueryRequestId }
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{ BeforeAndAfterAll, FunSpecLike }
 
-class CategoryAggregateSpec extends TestKit(ActorSystem("CategoryAggregateSpec", ConfigFactory.parseString(
-  """
-    |akka {
-    |  loglevel = DEBUG
-    |  persistence.journal.plugin = "akka.persistence.journal.inmem"
-    |}
-  """.stripMargin
-))) with ImplicitSender with FunSpecLike with BeforeAndAfterAll {
+class ItemAggregateSpec
+    extends TestKit(ActorSystem("ItemAggregateSpec", ConfigFactory.parseString(
+      """
+      |akka {
+      |  loglevel = DEBUG
+      |  persistence.journal.plugin = "akka.persistence.journal.inmem"
+      |}
+    """.stripMargin
+    ))) with ImplicitSender with FunSpecLike with BeforeAndAfterAll {
 
   val eventBus = EventBus.ofLocal(system)
 
@@ -27,13 +27,16 @@ class CategoryAggregateSpec extends TestKit(ActorSystem("CategoryAggregateSpec",
     TestKit.shutdownActorSystem(system)
   }
 
-  describe("CategoryAggregateSpec") {
+  describe("ItemAggregate") {
     it("生成できること") {
-      val id = CategoryId()
+      val id = ItemId()
+      val aggregate = system.actorOf(ItemAggregate.props(eventBus, id))
+      val itemTypeId = ItemTypeId()
       val name = "a"
-      val description = Some("b")
-      val aggregate = system.actorOf(CategoryAggregate.props(eventBus, id))
-      aggregate ! CreateCategory(CommandRequestId(), id, StatusType.Enabled, name, description, Some(1L))
+      val description: Option[String] = Some("")
+      val price = BigDecimal(0)
+      val supplierId = SupplierId()
+      aggregate ! CreateItem(CommandRequestId(), id, itemTypeId, name, description, price, supplierId)
       expectMsgType[CreateSucceeded] match {
         case response: CreateSucceeded =>
           assert(response.entityId == id)
@@ -48,21 +51,29 @@ class CategoryAggregateSpec extends TestKit(ActorSystem("CategoryAggregateSpec",
       }
     }
     it("異なるIDで生成できないこと") {
-      val id = CategoryId()
-      val wrongId = CategoryId()
-      val aggregate = TestActorRef[CategoryAggregate](CategoryAggregate.props(eventBus, id))
+      val id = ItemId()
+      val wrongId = ItemId()
+      val itemTypeId = ItemTypeId()
+      val name = "a"
+      val description: Option[String] = Some("")
+      val price = BigDecimal(0)
+      val supplierId = SupplierId()
+      val aggregate = TestActorRef[ItemAggregate](ItemAggregate.props(eventBus, id))
       val actor = aggregate.underlyingActor
       intercept[IllegalArgumentException] {
-        actor.receive(CreateCategory(CommandRequestId(), wrongId, StatusType.Enabled, "a", Some("a"), Some(1L)))
+        actor.receive(CreateItem(CommandRequestId(), wrongId, itemTypeId, name, description, price, supplierId))
       }
     }
     it("更新できること") {
-      val id = CategoryId()
+      val id = ItemId()
+      val itemTypeId = ItemTypeId()
       val name = "a"
+      val description: Option[String] = Some("")
+      val price = BigDecimal(0)
+      val supplierId = SupplierId()
       val name2 = "b"
-      val description = Some("b")
-      val aggregate = system.actorOf(CategoryAggregate.props(eventBus, id))
-      aggregate ! CreateCategory(CommandRequestId(), id, StatusType.Enabled, name, description, Some(1L))
+      val aggregate = system.actorOf(ItemAggregate.props(eventBus, id))
+      aggregate ! CreateItem(CommandRequestId(), id, itemTypeId, name, description, price, supplierId)
       receiveN(1)
       aggregate ! GetStateRequest(QueryRequestId(), id)
       expectMsgType[GetStateResponse] match {

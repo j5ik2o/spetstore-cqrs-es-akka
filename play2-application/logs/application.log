@@ -1,1 +1,16 @@
 2016-03-29 09:58:59,346 [INFO] from play.core.server.NettyServer in pool-4-thread-1 - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+2016-04-11 01:01:19,173 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:01:19.093Z.
+2016-04-11 01:01:19,697 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:01:19.697Z after 0s.
+2016-04-11 01:01:19,779 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:01:19.779Z.
+2016-04-11 01:01:19,862 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:01:19.862Z after 0s.
+2016-04-11 01:01:19,933 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:01:19.933Z.
+2016-04-11 01:01:19,966 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:01:19.966Z after 0s.
+2016-04-11 01:01:20,820 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:01:20.820Z.
+2016-04-11 01:04:45,051 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:04:45.003Z.
+2016-04-11 01:04:45,506 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:04:45.506Z after 0s.
+2016-04-11 01:04:45,619 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:04:45.619Z.
+2016-04-11 01:04:45,711 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:04:45.711Z after 0s.
+2016-04-11 01:04:45,790 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:04:45.790Z.
+2016-04-11 01:04:45,821 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:04:45.821Z after 0s.
+2016-04-11 01:04:46,531 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:04:46.531Z.
+2016-04-11 01:04:47,370 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:04:47.369Z after 1s.

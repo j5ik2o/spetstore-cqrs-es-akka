@@ -1,6 +1,6 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{ Actor, ActorRef, Props }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.CommandRequest
 

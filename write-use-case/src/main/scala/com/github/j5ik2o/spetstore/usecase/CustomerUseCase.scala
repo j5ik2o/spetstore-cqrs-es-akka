@@ -16,47 +16,47 @@ import scala.concurrent.ExecutionContext
 
 case class CustomerUseCase(actorRef: ActorRef)(implicit timeout: Timeout, executionContext: ExecutionContext) {
 
-//  val convertToCustomer: Flow[CreateCustomer, CreateCustomer, NotUsed] =
-//    Flow[CreateCustomer].map { createCustomer =>
-//      CreateCustomer(
-//        CommandRequestId(),
-//        CustomerId(),
-//        StatusType.Enabled,
-//        createCustomer.name,
-//        SexType(createCustomer.sexType),
-//        CustomerProfile(
-//          PostalAddress(
-//            ZipCode(createCustomer.zipCode),
-//            createCustomer.pref,
-//            createCustomer.cityName,
-//            createCustomer.addressName,
-//            createCustomer.buildingName
-//          ),
-//          Contact(
-//            createCustomer.email,
-//            createCustomer.phone
-//          )
-//        ),
-//        CustomerConfig(
-//          createCustomer.loginName,
-//          createCustomer.password,
-//          createCustomer.favoriteCategoryId.map { id =>
-//            CategoryId(UUID.fromString(id))
-//          }
-//        ),
-//        Some(1L)
-//      )
-//    }
-//
-//  val convertToUserCreated: Flow[CreateSucceeded, CustomerCreated, NotUsed] =
-//    Flow[CreateSucceeded].map { createSucceeded =>
-//      CustomerCreated(createSucceeded.entity)
-//    }
-//
-//  val createCustomer: Flow[CreateCustomer, CustomerCreated, NotUsed] = Flow[CreateCustomer]
-//    .via(convertToCustomer)
-//    .mapAsync(1) { value =>
-//      (actorRef ? value).mapTo[CreateSucceeded]
-//    }.via(convertToUserCreated)
+  //  val convertToCustomer: Flow[CreateCustomer, CreateCustomer, NotUsed] =
+  //    Flow[CreateCustomer].map { createCustomer =>
+  //      CreateCustomer(
+  //        CommandRequestId(),
+  //        CustomerId(),
+  //        StatusType.Enabled,
+  //        createCustomer.name,
+  //        SexType(createCustomer.sexType),
+  //        CustomerProfile(
+  //          PostalAddress(
+  //            ZipCode(createCustomer.zipCode),
+  //            createCustomer.pref,
+  //            createCustomer.cityName,
+  //            createCustomer.addressName,
+  //            createCustomer.buildingName
+  //          ),
+  //          Contact(
+  //            createCustomer.email,
+  //            createCustomer.phone
+  //          )
+  //        ),
+  //        CustomerConfig(
+  //          createCustomer.loginName,
+  //          createCustomer.password,
+  //          createCustomer.favoriteCategoryId.map { id =>
+  //            CategoryId(UUID.fromString(id))
+  //          }
+  //        ),
+  //        Some(1L)
+  //      )
+  //    }
+  //
+  //  val convertToUserCreated: Flow[CreateSucceeded, CustomerCreated, NotUsed] =
+  //    Flow[CreateSucceeded].map { createSucceeded =>
+  //      CustomerCreated(createSucceeded.entity)
+  //    }
+  //
+  //  val createCustomer: Flow[CreateCustomer, CustomerCreated, NotUsed] = Flow[CreateCustomer]
+  //    .via(convertToCustomer)
+  //    .mapAsync(1) { value =>
+  //      (actorRef ? value).mapTo[CreateSucceeded]
+  //    }.via(convertToUserCreated)
 
 }

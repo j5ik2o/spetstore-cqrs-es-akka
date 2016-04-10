@@ -7,7 +7,7 @@ import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Cus
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 
 class CustomerMessageBroker(eventBus: EventBus)
-  extends AbstractMessageBroker[CustomerId, CustomerCommandRequest] {
+    extends AbstractMessageBroker[CustomerId, CustomerCommandRequest] {
 
   override def createChildProps(aggregateId: CustomerId): Props =
     CustomerAggregate.props(eventBus, aggregateId)

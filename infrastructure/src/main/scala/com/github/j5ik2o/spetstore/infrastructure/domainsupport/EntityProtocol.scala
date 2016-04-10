@@ -2,7 +2,6 @@ package com.github.j5ik2o.spetstore.infrastructure.domainsupport
 
 import java.util.UUID
 
-
 trait EntityProtocol {
   type Id <: EntityId
   type CommandRequest <: EntityProtocol.CommandRequest[Id]
@@ -41,7 +40,7 @@ object EntityProtocol {
     val throwable: Throwable
   }
 
-  case class EventId(value: UUID) extends EntityId
+  case class EventId(value: UUID = UUID.randomUUID()) extends EntityId
 
   trait Event[ID <: EntityId] extends Entity[EventId] {
     val entityId: ID

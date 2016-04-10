@@ -1,7 +1,7 @@
 package com.github.j5ik2o.spetstore.domain.item
 
-import com.github.j5ik2o.spetstore.domain.basic.{Contact, PostalAddress, StatusType}
-import com.github.j5ik2o.spetstore.domain.item.SupplierAggregateProtocol.Update.{NameUpdated, SupplierUpdateEvent}
+import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
+import com.github.j5ik2o.spetstore.domain.item.SupplierAggregateProtocol.Update.{ NameUpdated, SupplierUpdateEvent }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
@@ -38,26 +38,25 @@ object SupplierAggregateProtocol extends EntityProtocol {
 
   }
 
-
 }
 
 /**
-  * 仕入れ先を表すエンティティ。
-  *
-  * @param id            [[SupplierId]]
-  * @param name          名前
-  * @param postalAddress 住所
-  * @param contact       連絡先
-  */
+ * 仕入れ先を表すエンティティ。
+ *
+ * @param id            [[SupplierId]]
+ * @param name          名前
+ * @param postalAddress 住所
+ * @param contact       連絡先
+ */
 case class Supplier(
-                     id: SupplierId,
-                     status: StatusType.Value,
-                     name: String,
-                     postalAddress: PostalAddress,
-                     contact: Contact,
-                     version: Option[Long]
-                   )
-  extends BaseEntity[SupplierId, SupplierUpdateEvent] {
+  id:            SupplierId,
+  status:        StatusType.Value,
+  name:          String,
+  postalAddress: PostalAddress,
+  contact:       Contact,
+  version:       Option[Long]
+)
+    extends BaseEntity[SupplierId, SupplierUpdateEvent] {
 
   override type This = Supplier
 

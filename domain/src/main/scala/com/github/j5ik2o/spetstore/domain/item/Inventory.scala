@@ -1,7 +1,7 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
-import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.Update.{InventoryUpdateEvent, QuantityUpdated}
+import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.Update.{ InventoryUpdateEvent, QuantityUpdated }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
@@ -24,7 +24,6 @@ object InventoryAggregateProtocol extends EntityProtocol {
 
   sealed trait InventoryQueryResponse extends EntityProtocol.QueryResponse[Id]
 
-
   object Create {
 
     trait InventoryCreateEvent extends InventoryEvent with EntityProtocol.CreateEvent[Id]
@@ -43,20 +42,20 @@ object InventoryAggregateProtocol extends EntityProtocol {
 }
 
 /**
-  * 在庫を表すエンティティ。
-  *
-  * @param id       [[InventoryId]]
-  * @param itemId   [[ItemId]]
-  * @param quantity 在庫数量
-  */
+ * 在庫を表すエンティティ。
+ *
+ * @param id       [[InventoryId]]
+ * @param itemId   [[ItemId]]
+ * @param quantity 在庫数量
+ */
 case class Inventory(
-                      id: InventoryId,
-                      status: StatusType.Value,
-                      itemId: ItemId,
-                      quantity: Int,
-                      version: Option[Long]
-                    )
-  extends BaseEntity[InventoryId, InventoryUpdateEvent] {
+  id:       InventoryId,
+  status:   StatusType.Value,
+  itemId:   ItemId,
+  quantity: Int,
+  version:  Option[Long]
+)
+    extends BaseEntity[InventoryId, InventoryUpdateEvent] {
 
   override type This = Inventory
 

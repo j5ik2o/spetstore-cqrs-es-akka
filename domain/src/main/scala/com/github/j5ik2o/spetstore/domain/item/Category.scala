@@ -3,10 +3,10 @@ package com.github.j5ik2o.spetstore.domain.item
 import java.util.UUID
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
-import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Create.{CategoryCreateEvent, CategoryCreated}
-import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Update.{CategoryUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Create.{ CategoryCreateEvent, CategoryCreated }
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Update.{ CategoryUpdateEvent, NameUpdated }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{BaseEntity, Entity, EntityFactory, EntityProtocol}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ BaseEntity, Entity, EntityFactory, EntityProtocol }
 
 object CategoryAggregateProtocol extends domainsupport.EntityProtocol {
   type Id = CategoryId
@@ -33,14 +33,14 @@ object CategoryAggregateProtocol extends domainsupport.EntityProtocol {
     }
 
     case class CreateCategory(
-                               id: EntityProtocol.CommandRequestId,
-                               entityId: CategoryId,
-                               status: StatusType.Value,
-                               name: String,
-                               description: Option[String] = None,
-                               version: Option[Long]
-                             )
-      extends CategoryCreateCommandRequest {
+      id:          EntityProtocol.CommandRequestId,
+      entityId:    CategoryId,
+      status:      StatusType.Value,
+      name:        String,
+      description: Option[String]                  = None,
+      version:     Option[Long]
+    )
+        extends CategoryCreateCommandRequest {
       override def toEvent: CategoryCreated =
         CategoryCreated(
           EntityProtocol.EventId(UUID.randomUUID()),
@@ -61,15 +61,14 @@ object CategoryAggregateProtocol extends domainsupport.EntityProtocol {
     trait CategoryCreateEvent extends CategoryEvent with EntityProtocol.CreateEvent[Id]
 
     case class CategoryCreated(
-                                id: EntityProtocol.EventId,
-                                entityId: CategoryId,
-                                status: StatusType.Value,
-                                name: String,
-                                description: Option[String] = None,
-                                version: Option[Long]
-                              )
-      extends CategoryCreateEvent
-
+      id:          EntityProtocol.EventId,
+      entityId:    CategoryId,
+      status:      StatusType.Value,
+      name:        String,
+      description: Option[String]         = None,
+      version:     Option[Long]
+    )
+        extends CategoryCreateEvent
 
   }
 
@@ -80,7 +79,7 @@ object CategoryAggregateProtocol extends domainsupport.EntityProtocol {
     }
 
     case class UpdateName(id: EntityProtocol.CommandRequestId, entityId: Id, name: String)
-      extends CategoryUpdateCommandRequest {
+        extends CategoryUpdateCommandRequest {
       override def toEvent: NameUpdated = NameUpdated(EntityProtocol.EventId(UUID.randomUUID()), entityId, name)
     }
 
@@ -106,7 +105,6 @@ object CategoryAggregateProtocol extends domainsupport.EntityProtocol {
 
   }
 
-
 }
 
 object Category extends EntityFactory[CategoryId, Category, CategoryCreateEvent, CategoryUpdateEvent] {
@@ -119,20 +117,20 @@ object Category extends EntityFactory[CategoryId, Category, CategoryCreateEvent,
 }
 
 /**
-  * カテゴリを表すエンティティ。
-  *
-  * @param id          識別子
-  * @param name        名前
-  * @param description 説明
-  */
+ * カテゴリを表すエンティティ。
+ *
+ * @param id          識別子
+ * @param name        名前
+ * @param description 説明
+ */
 case class Category(
-                     id: CategoryId,
-                     status: StatusType.Value,
-                     name: String,
-                     description: Option[String] = None,
-                     version: Option[Long]
-                   )
-  extends BaseEntity[CategoryId, CategoryUpdateEvent] {
+  id:          CategoryId,
+  status:      StatusType.Value,
+  name:        String,
+  description: Option[String]   = None,
+  version:     Option[Long]
+)
+    extends BaseEntity[CategoryId, CategoryUpdateEvent] {
 
   override type This = Category
 

@@ -1,7 +1,7 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings, ShardRegion}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings, ShardRegion }
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.CommandRequest

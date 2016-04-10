@@ -2,7 +2,7 @@ package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
 import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.InventoryEvent
-import com.github.j5ik2o.spetstore.domain.item.ItemTypeAggregateProtocol.Update.{DescriptionUpdated, ItemTypeUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.domain.item.ItemTypeAggregateProtocol.Update.{ DescriptionUpdated, ItemTypeUpdateEvent, NameUpdated }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
@@ -42,7 +42,6 @@ object ItemTypeAggregateProtocol extends EntityProtocol {
   }
 
 }
-
 
 /**
  * 商品の種類を表すエンティティ。
