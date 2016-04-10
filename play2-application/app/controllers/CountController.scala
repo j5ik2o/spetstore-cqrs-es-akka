@@ -21,7 +21,6 @@ class CountController @Inject() (counter: Counter) extends Controller {
    * `GET /count` requests by an entry in the `routes` config file.
    */
   def count = Action {
-    Ok()
     Ok(counter.nextCount().toString)
   }
 

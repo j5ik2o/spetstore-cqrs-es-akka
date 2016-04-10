@@ -23,19 +23,17 @@ trait Entity[ID <: EntityId] {
 
 }
 
-trait EntityWithState[ID <: EntityId] extends Entity[ID] {
+trait EntityWithState[ID <: EntityId, EV <: UpdateEvent[ID]] extends Entity[ID] {
 
-  type This <: EntityWithState[ID]
+  type This <: EntityWithState[ID, EV]
 
-  type Event <: UpdateEvent[ID]
-
-  type StateMachine = PartialFunction[Event, This]
+  type StateMachine = PartialFunction[EV, This]
 
   def updateState: StateMachine
 
 }
 
-trait BaseEntity[ID <: EntityId] extends EntityWithState[ID] {
+trait BaseEntity[ID <: EntityId, EV <: UpdateEvent[ID]] extends EntityWithState[ID, EV] {
 
   val version: Option[Long]
 

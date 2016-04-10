@@ -60,11 +60,9 @@ case class ItemType(
   description: Option[String]   = None,
   version:     Option[Long]
 )
-    extends BaseEntity[ItemTypeId] {
+    extends BaseEntity[ItemTypeId, ItemTypeUpdateEvent] {
 
   override type This = ItemType
-
-  override type Event = ItemTypeUpdateEvent
 
   override def withVersion(version: Long): Entity[ItemTypeId] =
     copy(version = Some(version))

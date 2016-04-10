@@ -44,23 +44,23 @@ trait Route extends SprayJsonSupport {
       )
     }
 
-  val customerWriteRoutes = path("customers") {
-    post {
-      entity(as[CreateCustomerJson]) { createCustomerJson =>
-        val result: Future[CustomerCreatedJson] =
-          Source.single(createCustomerJson)
-            .via(convertToCreateCustomer)
-            .via(customerUseCase.createCustomer)
-            .via(convertToCustomerCreated)
-            .toMat(Sink.head)(Keep.right)
-            .run()
-        onSuccess(result) { customerCreatedJson =>
-          complete(customerCreatedJson)
-        }
-      }
-    }
-  }
+//  val customerWriteRoutes = path("customers") {
+//    post {
+//      entity(as[CreateCustomerJson]) { createCustomerJson =>
+//        val result: Future[CustomerCreatedJson] =
+//          Source.single(createCustomerJson)
+//            .via(convertToCreateCustomer)
+//            .via(customerUseCase.createCustomer)
+//            .via(convertToCustomerCreated)
+//            .toMat(Sink.head)(Keep.right)
+//            .run()
+//        onSuccess(result) { customerCreatedJson =>
+//          complete(customerCreatedJson)
+//        }
+//      }
+//    }
+//  }
 
-  val routes = customerWriteRoutes
+  val routes = ??? // customerWriteRoutes
 
 }

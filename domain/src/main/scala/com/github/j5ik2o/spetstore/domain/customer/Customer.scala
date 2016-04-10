@@ -3,19 +3,19 @@ package com.github.j5ik2o.spetstore.domain.customer
 import java.util.UUID
 
 import com.github.j5ik2o.spetstore.domain.basic.{SexType, StatusType}
-import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.CustomerCreated
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{CustomerCreateEvent, CustomerCreated}
 import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{CustomerUpdateEvent, NameUpdated}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{BaseEntity, Entity, EntityFactory, EntityProtocol}
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol._
 
 
-object CustomerAggregateProtocol extends EntityProtocol {
-  override type Id = CustomerId
-  override type CommandRequest = CustomerCommandRequest
-  override type CommandResponse = CustomerCommandResponse
-  override type Event = CustomerEvent
-  override type QueryRequest = CustomerQueryRequest
-  override type QueryResponse = CustomerQueryResponse
+object CustomerAggregateProtocol extends domainsupport.EntityProtocol {
+  type Id = CustomerId
+  type CommandRequest = CustomerCommandRequest
+  type CommandResponse = CustomerCommandResponse
+  type Event = CustomerEvent
+  type QueryRequest = CustomerQueryRequest
+  type QueryResponse = CustomerQueryResponse
 
   sealed trait CustomerCommandRequest extends EntityProtocol.CommandRequest[CustomerId]
 
@@ -34,7 +34,7 @@ object CustomerAggregateProtocol extends EntityProtocol {
     }
 
     case class CreateCustomer(
-                               id: CommandRequestId,
+                               id: EntityProtocol.CommandRequestId,
                                entityId: CustomerId,
                                status: StatusType.Value,
                                name: String,
@@ -45,7 +45,7 @@ object CustomerAggregateProtocol extends EntityProtocol {
                              )
       extends CustomerCreateCommandRequest {
       override def toEvent: CustomerCreated = CustomerCreated(
-        EventId(UUID.randomUUID()),
+        EntityProtocol.EventId(UUID.randomUUID()),
         entityId,
         status,
         name,
@@ -56,15 +56,15 @@ object CustomerAggregateProtocol extends EntityProtocol {
       )
     }
 
-    case class CreateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId)
-      extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
+    case class CreateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId)
+      extends CustomerCommandResponse with EntityProtocol.CommandSucceeded[CustomerId, Customer]
 
-    case class CreateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId, throwable: Throwable)
-      extends CommandFailed[CustomerId]
+    case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId, throwable: Throwable)
+      extends EntityProtocol.CommandFailed[CustomerId]
 
-    trait CustomerCreateEvent extends CustomerEvent with CreateEvent[CustomerId]
+    trait CustomerCreateEvent extends CustomerEvent with EntityProtocol.CreateEvent[CustomerId]
 
-    case class CustomerCreated(id: EventId,
+    case class CustomerCreated(id: EntityProtocol.EventId,
                                entityId: CustomerId,
                                status: StatusType.Value,
                                name: String,
@@ -82,19 +82,19 @@ object CustomerAggregateProtocol extends EntityProtocol {
       override def toEvent: CustomerUpdateEvent
     }
 
-    case class UpdateName(id: CommandRequestId, entityId: CustomerId, name: String) extends CustomerUpdateCommandRequest {
-      override def toEvent: CustomerUpdateEvent = NameUpdated(EventId(UUID.randomUUID()), entityId, name)
+    case class UpdateName(id: EntityProtocol.CommandRequestId, entityId: CustomerId, name: String) extends CustomerUpdateCommandRequest {
+      override def toEvent: CustomerUpdateEvent = NameUpdated(EntityProtocol.EventId(UUID.randomUUID()), entityId, name)
     }
 
-    case class UpdateSucceeded(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId)
-      extends CustomerCommandResponse with CommandSucceeded[CustomerId, Customer]
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId)
+      extends CustomerCommandResponse with EntityProtocol.CommandSucceeded[CustomerId, Customer]
 
-    case class UpdateFailed(id: CommandResponseId, commandRequestId: CommandRequestId, entityId: CustomerId, throwable: Throwable)
-      extends CustomerCommandResponse with CommandFailed[CustomerId]
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: CustomerId, throwable: Throwable)
+      extends CustomerCommandResponse with EntityProtocol.CommandFailed[CustomerId]
 
-    trait CustomerUpdateEvent extends CustomerEvent with UpdateEvent[CustomerId]
+    trait CustomerUpdateEvent extends CustomerEvent with EntityProtocol.UpdateEvent[CustomerId]
 
-    case class NameUpdated(id: EventId, entityId: CustomerId, name: String) extends CustomerUpdateEvent
+    case class NameUpdated(id: EntityProtocol.EventId, entityId: CustomerId, name: String) extends CustomerUpdateEvent
 
   }
 
@@ -104,16 +104,19 @@ object CustomerAggregateProtocol extends EntityProtocol {
 
   object Query {
 
+    case class GetStateRequest(id: EntityProtocol.QueryRequestId, entityId: Id) extends EntityProtocol.GetStateRequest[Id]
+
+    case class GetStateResponse(id: EntityProtocol.QueryResponseId, queryRequestId: EntityProtocol.QueryRequestId, entityId: Id, entity: Option[Customer])
+      extends EntityProtocol.GetStateResponse[Id, Customer]
+
   }
 
 }
 
 
-object Customer extends EntityFactory[CustomerId, Customer] {
+object Customer extends EntityFactory[CustomerId, Customer, CustomerCreateEvent, CustomerUpdateEvent] {
 
-  override type Event = CustomerCreated
-
-  override def createFromEvent: PartialFunction[CustomerCreated, Customer] = {
+  override def createFromEvent: PartialFunction[CustomerCreateEvent, Customer] = {
     case CustomerCreated(_, customerId, status, name, sexType, profile, config, version) =>
       new Customer(customerId, status, name, sexType, profile, config, version)
   }
@@ -138,11 +141,9 @@ case class Customer(
                      config: CustomerConfig,
                      version: Option[Long]
                    )
-  extends BaseEntity[CustomerId] {
+  extends BaseEntity[CustomerId, CustomerUpdateEvent] {
 
   override type This = Customer
-
-  override type Event = CustomerUpdateEvent
 
   def withName(value: String): Customer =
     copy(name = value)

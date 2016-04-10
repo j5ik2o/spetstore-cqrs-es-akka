@@ -2,68 +2,67 @@ package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.persistence.PersistentActor
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{CreateEvent, UpdateEvent}
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 import scala.reflect.ClassTag
 
-abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID]](eventBus: EventBus, id: ID, createPersistentId: ID => String)
-    extends PersistentActor {
+abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID, UEV], CEV <: CreateEvent[ID], UEV <: UpdateEvent[ID]](eventBus: EventBus, id: ID, createPersistentId: ID => String)
+  extends PersistentActor {
 
   override def persistenceId: String = createPersistentId(id)
 
-  protected val entityFactory: EntityFactory[ID, E#This]
+  protected val entityFactory: EntityFactory[ID, E#This, CEV, UEV]
 
   protected var state: Option[E#This] = None
 
   protected def initialized = state.isDefined
 
-  def createSucceeded(commandRequest: CommandRequest[ID]): CommandSucceeded[ID, E]
-
-  def createFailed(commandRequest: CommandRequest[ID]): CommandFailed
-
-  def updateSucceeded(commandRequest: CommandRequest[ID]): CommandSucceeded[ID, E]
-
-  def updateFailed(commandRequest: CommandRequest[ID]): CommandFailed
-
-  def getSucceeded(commandRequest: CommandRequest[ID]): CommandSucceeded[ID, E]
-
-  def getFailed(commandRequest: CommandRequest[ID]): CommandFailed
-
-  def createState(event: CreateEvent): Unit = {
+  def applyCreateEvent(event: CEV): Unit = {
     state = Some(entityFactory.createFromEvent(event))
   }
 
-  def updateState(event: UpdateEvent): Unit = {
-    state = state.map(_.updateState(event.asInstanceOf[E#This#Event]).asInstanceOf[E#This])
+  def applyUpdateEvent(event: UEV): Unit = {
+    state = state.map(_.updateState(event).asInstanceOf[E#This])
   }
 
-  def createState[A <: CreateCommandRequest[ID]: ClassTag](commandRequest: A): Unit = commandRequest match {
-    case commandRequest: A if !initialized =>
+  def createSucceeded[C <: EntityProtocol.CommandRequest[ID] : ClassTag](commandRequest: C): EntityProtocol.CommandSucceeded[ID, E]
+
+  def createFailed[C <: EntityProtocol.CommandRequest[ID] : ClassTag](commandRequest: C): EntityProtocol.CommandFailed[ID]
+
+  def updateSucceeded[C <: EntityProtocol.CommandRequest[ID]](commandRequest: C): EntityProtocol.CommandSucceeded[ID, E]
+
+  def updateFailed[C <: EntityProtocol.CommandRequest[ID]](commandRequest: C): EntityProtocol.CommandFailed[ID]
+
+  def getSucceeded[Q <: EntityProtocol.GetStateRequest[ID] : ClassTag](queryRequest: Q): EntityProtocol.GetStateResponse[ID, E]
+
+  def createState[C <: EntityProtocol.CreateCommandRequest[ID] : ClassTag](commandRequest: C): Unit = commandRequest match {
+    case commandRequest: C if initialized =>
+      require(commandRequest.entityId == id)
       sender() ! createFailed(commandRequest)
-    case commandRequest: A if initialized =>
+    case commandRequest: C if !initialized =>
+      require(commandRequest.entityId == id)
       persist(commandRequest.toEvent) { event =>
-        createState(event)
+        applyCreateEvent(event.asInstanceOf[CEV])
         sender() ! createSucceeded(commandRequest)
       }
   }
 
-  def updateState[A <: UpdateCommandRequest[ID]: ClassTag](commandRequest: A): Unit = commandRequest match {
-    case commandRequest: A if !initialized =>
+  def updateState[C <: EntityProtocol.UpdateCommandRequest[ID] : ClassTag](commandRequest: C): Unit = commandRequest match {
+    case commandRequest: C if !initialized =>
+      require(commandRequest.entityId == id)
       sender() ! updateFailed(commandRequest)
-    case commandRequest: A if initialized =>
+    case commandRequest: C if initialized =>
+      require(commandRequest.entityId == id)
       persist(commandRequest.toEvent) { event =>
-        updateState(event)
+        applyUpdateEvent(event.asInstanceOf[UEV])
         sender() ! updateSucceeded(commandRequest)
       }
   }
 
-  def getState[A <: GetCommandRequest[ID]: ClassTag](commandRequest: A): Unit = {
+  def getState[Q <: EntityProtocol.GetStateRequest[ID] : ClassTag](commandRequest: Q): Unit = {
     require(commandRequest.entityId == id)
-    if (state.isDefined) {
-      sender() ! getSucceeded(commandRequest)
-    } else {
-      sender() ! getFailed(commandRequest)
-    }
+    sender() ! getSucceeded(commandRequest)
   }
 
 }

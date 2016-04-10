@@ -10,12 +10,19 @@ val formatPreferences = FormattingPreferences()
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(AlignArguments, true)
 
+val testSettings = Seq(
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+    "org.mockito" % "mockito-core" % "1.10.19" % "test"
+  )
+)
+
 val commonSettings = Seq(
   organization := "com.github.j5ik2o",
   version := "1.0.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-encoding", "UTF-8", "-language:existentials", "-language:implicitConversions", "-language:postfixOps")
-) ++ SbtScalariform.scalariformSettings ++ Seq(
+) ++ testSettings ++ SbtScalariform.scalariformSettings ++ Seq(
   ScalariformKeys.preferences in Compile := formatPreferences,
   ScalariformKeys.preferences in Test := formatPreferences)
 
@@ -38,9 +45,7 @@ val infrastructure = (project in file("infrastructure"))
       "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.4.2" % "test",
       "com.github.nscala-time" %% "nscala-time" % "2.10.0",
       "org.skinny-framework" %% "skinny-orm" % "2.0.7",
-      "com.h2database" % "h2" % "1.4.+",
-      "de.knutwalker" %% "typed-actors" % "1.6.0-a24",
-      "de.knutwalker" %% "typed-actors-creator" % "1.6.0-a24"
+      "com.h2database" % "h2" % "1.4.+"
     )
   )
 

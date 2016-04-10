@@ -69,11 +69,9 @@ case class Order(
   orderItems:      List[OrderItem],
   version:         Option[Long]
 )
-    extends BaseEntity[OrderId] {
+    extends BaseEntity[OrderId, OrderUpdateEvent] {
 
   override type This = Order
-
-  override type Event = OrderUpdateEvent
 
   override def updateState: StateMachine = {
     case CustomerNameUpdated(_, entityId, value) =>

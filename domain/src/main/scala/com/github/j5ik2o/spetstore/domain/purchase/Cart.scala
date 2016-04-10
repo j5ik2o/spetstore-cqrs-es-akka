@@ -56,11 +56,9 @@ case class Cart(
                  customerId: CustomerId,
                  cartItems: List[CartItem],
                  version: Option[Long]
-               ) extends BaseEntity[CartId] {
+               ) extends BaseEntity[CartId, CartUpdateEvent] {
 
   override type This = Cart
-
-  override type Event = CartUpdateEvent
 
   override def updateState: StateMachine = {
     case CartItemsAdded(_, entityId, values) =>

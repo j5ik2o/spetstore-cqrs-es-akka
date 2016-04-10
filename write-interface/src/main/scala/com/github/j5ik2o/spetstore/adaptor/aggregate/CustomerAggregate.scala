@@ -2,8 +2,14 @@ package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.actor.Props
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
-import com.github.j5ik2o.spetstore.domain.customer._
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create._
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Query.{GetStateRequest, GetStateResponse}
+import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Update.{CustomerUpdateCommandRequest, CustomerUpdateEvent, UpdateFailed, UpdateSucceeded}
+import com.github.j5ik2o.spetstore.domain.customer.{Customer, CustomerId}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol._
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
+
+import scala.reflect.ClassTag
 
 object CustomerAggregate {
 
@@ -13,37 +19,35 @@ object CustomerAggregate {
 
 }
 
-final class CustomerAggregate(eventBus: EventBus, id: CustomerId) extends AbstractAggregate[CustomerId, Customer](eventBus, id, CustomerAggregate.name) {
+final class CustomerAggregate(eventBus: EventBus, id: CustomerId)
+  extends AbstractAggregate[CustomerId, Customer, CustomerCreateEvent, CustomerUpdateEvent](eventBus, id, CustomerAggregate.name) {
 
-  override protected val entityFactory: EntityFactory[CustomerId, Customer] = Customer
+  override protected val entityFactory = Customer
 
-  override def createSucceeded(commandRequest: CommandRequest[CustomerId]): CommandSucceeded[CustomerId, Customer] =
-    CustomerCommandResponse.CreateSucceeded(CommandResponseId(), commandRequest.id, state.get)
+  override def getSucceeded[Q <: EntityProtocol.GetStateRequest[CustomerId] : ClassTag](queryRequest: Q): GetStateResponse =
+    GetStateResponse(QueryResponseId(), queryRequest.id, id, state)
 
-  override def createFailed(commandRequest: CommandRequest[CustomerId]): CommandFailed =
-    CustomerCommandResponse.CreateFailed(CommandResponseId(), commandRequest.id, CreateFailedException("Creating state is failed."))
+  override def createSucceeded[C <: CommandRequest[CustomerId] : ClassTag](commandRequest: C): CommandSucceeded[CustomerId, Customer] =
+    CreateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def updateSucceeded(commandRequest: CommandRequest[CustomerId]): CommandSucceeded[CustomerId, Customer] =
-    CustomerCommandResponse.UpdateSucceeded(CommandResponseId(), commandRequest.id, state.get)
+  override def createFailed[C <: CommandRequest[CustomerId] : ClassTag](commandRequest: C): CommandFailed[CustomerId] =
+    CreateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
-  override def updateFailed(commandRequest: CommandRequest[CustomerId]): CommandFailed =
-    CustomerCommandResponse.UpdateFailed(CommandResponseId(), commandRequest.id, UpdateFailedException("Updating state is failed."))
+  override def updateSucceeded[C <: CommandRequest[CustomerId]](commandRequest: C): CommandSucceeded[CustomerId, Customer] =
+    UpdateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def getSucceeded(commandRequest: CommandRequest[CustomerId]): CommandSucceeded[CustomerId, Customer] =
-    CustomerCommandResponse.GetSucceeded(CommandResponseId(), commandRequest.id, state.get)
-
-  override def getFailed(commandRequest: CommandRequest[CustomerId]): CommandFailed =
-    CustomerCommandResponse.GetFailed(CommandResponseId(), commandRequest.id, GetFailedException("Getting state is failed."))
+  override def updateFailed[C <: CommandRequest[CustomerId]](commandRequest: C): CommandFailed[CustomerId] =
+    UpdateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
   override def receiveRecover: Receive = {
-    case event: CustomerCreateEvent => createState(event)
-    case event: CustomerUpdateEvent => updateState(event)
+    case createEvent: CustomerCreateEvent => applyCreateEvent(createEvent)
+    case updateEvent: CustomerUpdateEvent => applyUpdateEvent(updateEvent)
   }
 
   override def receiveCommand: Receive = {
-    case commandRequest: CustomerGetCommandRequest    => getState(commandRequest)
-    case commandRequest: CustomerCreateCommandRequest => createState(commandRequest)
-    case commandRequest: CustomerUpdateCommandRequest => updateState(commandRequest)
+    case queryRequest: GetStateRequest => getState(queryRequest)
+    case createRequest: CustomerCreateCommandRequest => createState(createRequest)
+    case updateRequest: CustomerUpdateCommandRequest => updateState(updateRequest)
   }
 
 }

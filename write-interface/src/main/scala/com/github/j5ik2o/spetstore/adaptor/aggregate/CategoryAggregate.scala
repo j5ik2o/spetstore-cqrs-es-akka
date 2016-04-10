@@ -2,8 +2,14 @@ package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.actor.Props
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Create._
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Query.{GetStateRequest, GetStateResponse}
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.Update.{CategoryUpdateCommandRequest, CategoryUpdateEvent, UpdateFailed, UpdateSucceeded}
 import com.github.j5ik2o.spetstore.domain.item._
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol._
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
+
+import scala.reflect.ClassTag
 
 object CategoryAggregate {
 
@@ -13,37 +19,35 @@ object CategoryAggregate {
 
 }
 
-final class CategoryAggregate(eventBus: EventBus, id: CategoryId) extends AbstractAggregate[CategoryId, Category](eventBus, id, CategoryAggregate.name) {
+final class CategoryAggregate(eventBus: EventBus, id: CategoryId)
+  extends AbstractAggregate[CategoryId, Category, CategoryCreateEvent, CategoryUpdateEvent](eventBus, id, CategoryAggregate.name) {
 
-  override protected val entityFactory: EntityFactory[CategoryId, Category] = Category
+  override protected val entityFactory = Category
 
-  override def createSucceeded(commandRequest: CommandRequest[CategoryId]): CommandSucceeded[CategoryId, Category] =
-    CategoryCommandResponse.CreateSucceeded(CommandResponseId(), commandRequest.id, state.get)
+  override def getSucceeded[Q <: EntityProtocol.GetStateRequest[CategoryId] : ClassTag](queryRequest: Q): GetStateResponse =
+    GetStateResponse(QueryResponseId(), queryRequest.id, id, state)
 
-  override def createFailed(commandRequest: CommandRequest[CategoryId]): CommandFailed =
-    CategoryCommandResponse.CreateFailed(CommandResponseId(), commandRequest.id, CreateFailedException("Creating state is failed."))
+  override def createSucceeded[C <: CommandRequest[CategoryId] : ClassTag](commandRequest: C): CommandSucceeded[CategoryId, Category] =
+    CreateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def updateSucceeded(commandRequest: CommandRequest[CategoryId]): CommandSucceeded[CategoryId, Category] =
-    CategoryCommandResponse.UpdateSucceeded(CommandResponseId(), commandRequest.id, state.get)
+  override def createFailed[C <: CommandRequest[CategoryId] : ClassTag](commandRequest: C): CommandFailed[CategoryId] =
+    CreateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
-  override def updateFailed(commandRequest: CommandRequest[CategoryId]): CommandFailed =
-    CategoryCommandResponse.UpdateFailed(CommandResponseId(), commandRequest.id, UpdateFailedException("Creating state is failed."))
+  override def updateSucceeded[C <: CommandRequest[CategoryId]](commandRequest: C): CommandSucceeded[CategoryId, Category] =
+    UpdateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def getSucceeded(commandRequest: CommandRequest[CategoryId]): CommandSucceeded[CategoryId, Category] =
-    CategoryCommandResponse.GetSucceeded(CommandResponseId(), commandRequest.id, state.get)
-
-  override def getFailed(commandRequest: CommandRequest[CategoryId]): CommandFailed =
-    CategoryCommandResponse.GetFailed(CommandResponseId(), commandRequest.id, UpdateFailedException("Getting state is failed."))
+  override def updateFailed[C <: CommandRequest[CategoryId]](commandRequest: C): CommandFailed[CategoryId] =
+    UpdateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
   override def receiveRecover: Receive = {
-    case event: CategoryCreateEvent => createState(event)
-    case event: CategoryUpdateEvent => updateState(event)
+    case createEvent: CategoryCreateEvent => applyCreateEvent(createEvent)
+    case updateEvent: CategoryUpdateEvent => applyUpdateEvent(updateEvent)
   }
 
   override def receiveCommand: Receive = {
-    case commandRequest: CategoryGetCommandRequest    => getState(commandRequest)
-    case commandRequest: CategoryCreateCommandRequest => createState(commandRequest)
-    case commandRequest: CategoryUpdateCommandRequest => updateState(commandRequest)
+    case queryRequest: GetStateRequest => getState(queryRequest)
+    case updateRequest: CategoryUpdateCommandRequest => updateState(updateRequest)
+    case createRequest: CategoryCreateCommandRequest => createState(createRequest)
   }
 
 }

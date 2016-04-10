@@ -57,11 +57,19 @@ object EntityProtocol {
     val entityId: ID
   }
 
+  trait GetStateRequest[ID <: EntityId] extends Entity[QueryRequestId] {
+    val entityId: ID
+  }
+
   case class QueryResponseId(value: UUID = UUID.randomUUID()) extends EntityId
 
   trait QueryResponse[ID <: EntityId] extends Entity[QueryResponseId] {
     val queryRequestId: QueryRequestId
     val entityId: ID
+  }
+
+  trait GetStateResponse[Id <: EntityId, E <: Entity[Id]] extends Entity[QueryResponseId] {
+    val entity: Option[E]
   }
 
 }

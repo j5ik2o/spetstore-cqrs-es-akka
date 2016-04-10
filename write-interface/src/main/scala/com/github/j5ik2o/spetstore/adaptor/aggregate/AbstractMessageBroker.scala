@@ -1,7 +1,8 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
-import akka.actor.{ Actor, ActorRef, Props }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ CommandRequest, CommandResponse, EntityId }
+import akka.actor.{Actor, ActorRef, Props}
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityId
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.CommandRequest
 
 abstract class AbstractMessageBroker[ID <: EntityId, CR <: CommandRequest[ID]] extends Actor {
 

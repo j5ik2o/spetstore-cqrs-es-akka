@@ -1,9 +1,10 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.actor.Props
-import akka.cluster.sharding.ShardRegion.{ ExtractEntityId, ExtractShardId }
+import akka.cluster.sharding.ShardRegion.{ExtractEntityId, ExtractShardId}
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
-import com.github.j5ik2o.spetstore.domain.item.{ CategoryCommandRequest, CategoryId }
+import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.CategoryCommandRequest
+import com.github.j5ik2o.spetstore.domain.item.CategoryId
 
 final class CategoryMessageBroker(eventBus: EventBus) extends AbstractMessageBroker[CategoryId, CategoryCommandRequest] {
 
