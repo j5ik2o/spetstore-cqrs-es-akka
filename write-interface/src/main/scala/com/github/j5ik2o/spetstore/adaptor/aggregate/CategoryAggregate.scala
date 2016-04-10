@@ -27,16 +27,16 @@ final class CategoryAggregate(eventBus: EventBus, id: CategoryId)
   override def getSucceeded[Q <: EntityProtocol.GetStateRequest[CategoryId]: ClassTag](queryRequest: Q): GetStateResponse =
     GetStateResponse(QueryResponseId(), queryRequest.id, id, state)
 
-  override def createSucceeded[C <: CommandRequest[CategoryId]: ClassTag](commandRequest: C): CommandSucceeded[CategoryId, Category] =
+  override def createSucceeded[C <: EntityProtocol.CommandRequest[CategoryId]: ClassTag](commandRequest: C): EntityProtocol.CommandSucceeded[CategoryId, Category] =
     CreateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def createFailed[C <: CommandRequest[CategoryId]: ClassTag](commandRequest: C): CommandFailed[CategoryId] =
+  override def createFailed[C <: EntityProtocol.CommandRequest[CategoryId]: ClassTag](commandRequest: C): EntityProtocol.CommandFailed[CategoryId] =
     CreateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
-  override def updateSucceeded[C <: CommandRequest[CategoryId]](commandRequest: C): CommandSucceeded[CategoryId, Category] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[CategoryId]](commandRequest: C): EntityProtocol.CommandSucceeded[CategoryId, Category] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def updateFailed[C <: CommandRequest[CategoryId]](commandRequest: C): CommandFailed[CategoryId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[CategoryId]](commandRequest: C): EntityProtocol.CommandFailed[CategoryId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
   override def receiveRecover: Receive = {

@@ -3,10 +3,11 @@ package com.github.j5ik2o.spetstore.domain.item
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
 import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Create.{ ItemCreateEvent, ItemCreated }
 import com.github.j5ik2o.spetstore.domain.item.ItemAggregateProtocol.Update.{ ItemUpdateEvent, NameUpdated }
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
-object ItemAggregateProtocol extends EntityProtocol {
+object ItemAggregateProtocol extends domainsupport.EntityProtocol {
   type Id = ItemId
   type CommandRequest = ItemCommandRequest
   type CommandResponse = ItemCommandResponse
@@ -26,7 +27,7 @@ object ItemAggregateProtocol extends EntityProtocol {
 
   object Create {
 
-    trait ItemCreateCommandRequest extends ItemCommandRequest with EntityProtocol.CreateCommandRequest[ItemId] {
+    trait ItemCreateCommandRequest extends ItemCommandRequest with EntityProtocol.CreateCommandRequest[Id] {
       override def toEvent: ItemCreateEvent
     }
 
@@ -55,7 +56,7 @@ object ItemAggregateProtocol extends EntityProtocol {
       extends ItemCommandResponse with EntityProtocol.CommandSucceeded[Id, Item]
 
     case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
-      extends EntityProtocol.CommandFailed[Id]
+      extends ItemCommandResponse with EntityProtocol.CommandFailed[Id]
 
     trait ItemCreateEvent extends ItemEvent with EntityProtocol.CreateEvent[Id]
 

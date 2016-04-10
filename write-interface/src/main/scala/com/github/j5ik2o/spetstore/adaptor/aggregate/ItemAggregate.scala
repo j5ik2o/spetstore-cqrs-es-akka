@@ -12,9 +12,11 @@ import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol._
 import scala.reflect.ClassTag
 
 object ItemAggregate {
+
   def name(id: ItemId): String = s"item-${id.value}"
 
   def props(eventBus: EventBus, id: ItemId): Props = Props(new ItemAggregate(eventBus, id))
+
 }
 
 class ItemAggregate(eventBus: EventBus, id: ItemId)
@@ -26,16 +28,16 @@ class ItemAggregate(eventBus: EventBus, id: ItemId)
     GetStateResponse(QueryResponseId(), queryRequest.id, id, state)
   }
 
-  override def createSucceeded[C <: CommandRequest[ItemId]: ClassTag](commandRequest: C): CommandSucceeded[ItemId, Item] =
+  override def createSucceeded[C <: EntityProtocol.CommandRequest[ItemId]: ClassTag](commandRequest: C): EntityProtocol.CommandSucceeded[ItemId, Item] =
     CreateSucceeded(CommandResponseId(), commandRequest.id, id)
 
-  override def createFailed[C <: CommandRequest[ItemId]: ClassTag](commandRequest: C): CommandFailed[ItemId] =
+  override def createFailed[C <: EntityProtocol.CommandRequest[ItemId]: ClassTag](commandRequest: C): EntityProtocol.CommandFailed[ItemId] =
     CreateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
-  override def updateSucceeded[C <: CommandRequest[ItemId]](commandRequest: C): CommandSucceeded[ItemId, Item] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[ItemId]](commandRequest: C): EntityProtocol.CommandSucceeded[ItemId, Item] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, id)
 
-  override def updateFailed[C <: CommandRequest[ItemId]](commandRequest: C): CommandFailed[ItemId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[ItemId]](commandRequest: C): EntityProtocol.CommandFailed[ItemId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
   override def receiveRecover: Receive = {

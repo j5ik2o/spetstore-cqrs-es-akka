@@ -1,18 +1,18 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
-import com.github.j5ik2o.spetstore.domain.item.InventoryAggregateProtocol.InventoryEvent
+import com.github.j5ik2o.spetstore.domain.item.ItemTypeAggregateProtocol.Create.{ ItemTypeCreateEvent, ItemTypeCreated }
 import com.github.j5ik2o.spetstore.domain.item.ItemTypeAggregateProtocol.Update.{ DescriptionUpdated, ItemTypeUpdateEvent, NameUpdated }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, CommandResponseId, EventId }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 object ItemTypeAggregateProtocol extends EntityProtocol {
-  override type Id = ItemTypeId
-  override type CommandRequest = ItemTypeCommandRequest
-  override type CommandResponse = ItemTypeCommandResponse
-  override type Event = ItemTypeEvent
-  override type QueryRequest = ItemTypeQueryRequest
-  override type QueryResponse = ItemTypeQueryResponse
+  type Id = ItemTypeId
+  type CommandRequest = ItemTypeCommandRequest
+  type CommandResponse = ItemTypeCommandResponse
+  type Event = ItemTypeEvent
+  type QueryRequest = ItemTypeQueryRequest
+  type QueryResponse = ItemTypeQueryResponse
 
   sealed trait ItemTypeCommandRequest extends EntityProtocol.CommandRequest[Id]
 
@@ -26,21 +26,92 @@ object ItemTypeAggregateProtocol extends EntityProtocol {
 
   object Create {
 
+    trait ItemTypeCreateCommandRequest extends ItemTypeCommandRequest with EntityProtocol.CreateCommandRequest[Id] {
+      override def toEvent: ItemTypeCreateEvent
+    }
+
+    case class CreateItemType(
+      id:          CommandRequestId,
+      entityId:    Id,
+      categoryId:  CategoryId,
+      name:        String,
+      description: Option[String]   = None
+    ) extends ItemTypeCreateCommandRequest {
+      override def toEvent: ItemTypeCreateEvent = ItemTypeCreated(
+        EntityProtocol.EventId(),
+        entityId,
+        categoryId,
+        name,
+        description
+      )
+    }
+
+    case class CreateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends ItemTypeCommandResponse with EntityProtocol.CommandSucceeded[Id, ItemType]
+
+    case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends ItemTypeCommandResponse with EntityProtocol.CommandFailed[Id]
+
     trait ItemTypeCreateEvent extends ItemTypeEvent with EntityProtocol.CreateEvent[Id]
 
+    case class ItemTypeCreated(
+      id:          EntityProtocol.EventId,
+      entityId:    Id,
+      categoryId:  CategoryId,
+      name:        String,
+      description: Option[String]         = None
+    )
+        extends ItemTypeCreateEvent
+
   }
+
   object Update {
+
+    trait ItemTypeUpdateCommandRequest extends ItemTypeCommandRequest with EntityProtocol.UpdateCommandRequest[Id] {
+      override def toEvent: ItemTypeUpdateEvent
+    }
+
+    case class UpdateName(
+      id:       CommandRequestId,
+      entityId: Id,
+      name:     String
+    )
+        extends ItemTypeUpdateCommandRequest {
+      override def toEvent: ItemTypeUpdateEvent =
+        NameUpdated(EntityProtocol.EventId(), entityId, name)
+    }
+
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends ItemTypeCommandResponse with EntityProtocol.CommandSucceeded[Id, ItemType]
+
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends ItemTypeCommandResponse with EntityProtocol.CommandFailed[Id]
 
     trait ItemTypeUpdateEvent extends ItemTypeEvent with EntityProtocol.UpdateEvent[Id]
 
-    case class NameUpdated(id: EventId, entityId: ItemTypeId, name: String)
+    case class NameUpdated(id: EventId, entityId: Id, name: String)
       extends ItemTypeUpdateEvent
 
-    case class DescriptionUpdated(id: EventId, entityId: ItemTypeId, description: Option[String])
+    case class DescriptionUpdated(id: EventId, entityId: Id, description: Option[String])
       extends ItemTypeUpdateEvent
 
   }
 
+  object Query {
+
+    case class GetStateRequest(id: EntityProtocol.QueryRequestId, entityId: Id) extends EntityProtocol.GetStateRequest[Id]
+
+    case class GetStateResponse(id: EntityProtocol.QueryResponseId, queryRequestId: EntityProtocol.QueryRequestId, entityId: Id, entity: Option[ItemType])
+      extends EntityProtocol.GetStateResponse[Id, ItemType]
+
+  }
+}
+
+object ItemType extends EntityFactory[ItemTypeId, ItemType, ItemTypeCreateEvent, ItemTypeUpdateEvent] {
+  override def createFromEvent: PartialFunction[ItemTypeCreateEvent, ItemType] = {
+    case ItemTypeCreated(_, id, categoryId, name, description) =>
+      ItemType(id, StatusType.Enabled, categoryId, name, description, Some(1L))
+  }
 }
 
 /**
