@@ -1,13 +1,14 @@
 package com.github.j5ik2o.spetstore.adaptor.aggregate
 
 import akka.persistence.PersistentActor
-import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
+import com.github.j5ik2o.spetstore.adaptor.eventbus.{EventBus, EventWithSender}
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{CreateEvent, UpdateEvent}
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 import scala.reflect.ClassTag
 
-abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID, UEV], CEV <: CreateEvent[ID], UEV <: UpdateEvent[ID]](eventBus: EventBus, id: ID, createPersistentId: ID => String)
+abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID, UEV], CEV <: CreateEvent[ID], UEV <: UpdateEvent[ID]]
+(eventBus: EventBus, id: ID, createPersistentId: ID => String)
   extends PersistentActor {
 
   override def persistenceId: String = createPersistentId(id)
@@ -45,6 +46,7 @@ abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID, UEV], 
       persist(commandRequest.toEvent) { event =>
         applyCreateEvent(event.asInstanceOf[CEV])
         sender() ! createSucceeded(commandRequest)
+        eventBus.publish(EventWithSender(event, sender()))
       }
   }
 
@@ -57,6 +59,7 @@ abstract class AbstractAggregate[ID <: EntityId, E <: EntityWithState[ID, UEV], 
       persist(commandRequest.toEvent) { event =>
         applyUpdateEvent(event.asInstanceOf[UEV])
         sender() ! updateSucceeded(commandRequest)
+        eventBus.publish(EventWithSender(event, sender()))
       }
   }
 
