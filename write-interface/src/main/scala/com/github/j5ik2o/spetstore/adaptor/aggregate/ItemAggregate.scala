@@ -19,7 +19,7 @@ object ItemAggregate {
 
 }
 
-class ItemAggregate(eventBus: EventBus, id: ItemId)
+final class ItemAggregate(eventBus: EventBus, id: ItemId)
     extends AbstractAggregate[ItemId, Item, ItemCreateEvent, ItemUpdateEvent](eventBus, id, ItemAggregate.name) {
 
   override protected val entityFactory = Item

@@ -18,7 +18,7 @@ object SupplierAggregate {
   def props(eventBus: EventBus, id: SupplierId): Props = Props(new SupplierAggregate(eventBus, id))
 }
 
-class SupplierAggregate(eventBus: EventBus, id: SupplierId)
+final class SupplierAggregate(eventBus: EventBus, id: SupplierId)
     extends AbstractAggregate[SupplierId, Supplier, SupplierCreateEvent, SupplierUpdateEvent](eventBus, id, SupplierAggregate.name) {
 
   override protected val entityFactory = Supplier
