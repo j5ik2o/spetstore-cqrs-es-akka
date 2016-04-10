@@ -49,4 +49,5 @@ class ItemTypeAggregate(eventBus: EventBus, id: ItemTypeId)
     case createRequest: ItemTypeCreateCommandRequest => createState(createRequest)
     case updateRequest: ItemTypeUpdateCommandRequest => updateState(updateRequest)
   }
+
 }

@@ -22,3 +22,11 @@
 2016-04-11 01:49:12,882 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:49:12.882Z after 0s.
 2016-04-11 01:49:13,679 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Starting application at 2016-04-10T16:49:13.679Z.
 2016-04-11 01:49:14,449 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T16:49:14.449Z after 1s.
+2016-04-11 02:39:42,773 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T17:39:42.722Z.
+2016-04-11 02:39:43,239 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T17:39:43.239Z after 1s.
+2016-04-11 02:39:43,353 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T17:39:43.353Z.
+2016-04-11 02:39:43,446 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T17:39:43.446Z after 0s.
+2016-04-11 02:39:43,531 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Starting application at 2016-04-10T17:39:43.531Z.
+2016-04-11 02:39:43,560 [INFO] from application in pool-1-thread-1-ScalaTest-running-ApplicationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T17:39:43.560Z after 0s.
+2016-04-11 02:39:44,416 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Starting application at 2016-04-10T17:39:44.416Z.
+2016-04-11 02:39:45,338 [INFO] from application in pool-1-thread-1-ScalaTest-running-IntegrationSpec - ApplicationTimer demo: Stopping application at 2016-04-10T17:39:45.338Z after 1s.

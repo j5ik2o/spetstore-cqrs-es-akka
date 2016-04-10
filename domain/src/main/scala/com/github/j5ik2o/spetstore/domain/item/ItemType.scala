@@ -31,11 +31,11 @@ object ItemTypeAggregateProtocol extends EntityProtocol {
     }
 
     case class CreateItemType(
-      id:          CommandRequestId,
-      entityId:    Id,
-      categoryId:  CategoryId,
-      name:        String,
-      description: Option[String]   = None
+        id:          CommandRequestId,
+        entityId:    Id,
+        categoryId:  CategoryId,
+        name:        String,
+        description: Option[String]   = None
     ) extends ItemTypeCreateCommandRequest {
       override def toEvent: ItemTypeCreateEvent = ItemTypeCreated(
         EntityProtocol.EventId(),

@@ -1,17 +1,18 @@
 package com.github.j5ik2o.spetstore.domain.item
 
 import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
+import com.github.j5ik2o.spetstore.domain.item.SupplierAggregateProtocol.Create.{ SupplierCreateEvent, SupplierCreated }
 import com.github.j5ik2o.spetstore.domain.item.SupplierAggregateProtocol.Update.{ NameUpdated, SupplierUpdateEvent }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, EventId }
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
 
 object SupplierAggregateProtocol extends EntityProtocol {
-  override type Id = SupplierId
-  override type CommandRequest = SupplierCommandRequest
-  override type CommandResponse = SupplierCommandResponse
-  override type Event = SupplierEvent
-  override type QueryRequest = SupplierQueryRequest
-  override type QueryResponse = SupplierQueryResponse
+  type Id = SupplierId
+  type CommandRequest = SupplierCommandRequest
+  type CommandResponse = SupplierCommandResponse
+  type Event = SupplierEvent
+  type QueryRequest = SupplierQueryRequest
+  type QueryResponse = SupplierQueryResponse
 
   sealed trait SupplierCommandRequest extends EntityProtocol.CommandRequest[Id]
 
@@ -25,17 +26,84 @@ object SupplierAggregateProtocol extends EntityProtocol {
 
   object Create {
 
+    trait SupplierCreateCommandRequest extends SupplierCommandRequest with EntityProtocol.CreateCommandRequest[Id] {
+      override def toEvent: SupplierCreateEvent
+    }
+
+    case class CreateSupplier(
+      id:            CommandRequestId,
+      entityId:      Id,
+      name:          String,
+      postalAddress: PostalAddress,
+      contact:       Contact
+    ) extends SupplierCreateCommandRequest {
+      override def toEvent: SupplierCreateEvent =
+        SupplierCreated(EventId(), entityId, name, postalAddress, contact)
+    }
+
+    case class CreateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends SupplierCommandResponse with EntityProtocol.CommandSucceeded[Id, Supplier]
+
+    case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends SupplierCommandResponse with EntityProtocol.CommandFailed[Id]
+
     trait SupplierCreateEvent extends SupplierEvent with EntityProtocol.CreateEvent[Id]
+
+    case class SupplierCreated(
+      id:            EventId,
+      entityId:      Id,
+      name:          String,
+      postalAddress: PostalAddress,
+      contact:       Contact
+    ) extends SupplierCreateEvent
 
   }
 
   object Update {
+
+    trait SupplierUpdateCommandRequest extends SupplierCommandRequest with EntityProtocol.UpdateCommandRequest[Id] {
+      override def toEvent: SupplierUpdateEvent
+    }
+
+    case class UpdateName(
+      id:       CommandRequestId,
+      entityId: Id,
+      name:     String
+    )
+        extends SupplierUpdateCommandRequest {
+      override def toEvent: SupplierUpdateEvent =
+        NameUpdated(EntityProtocol.EventId(), entityId, name)
+    }
+
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends SupplierCommandResponse with EntityProtocol.CommandSucceeded[Id, Supplier]
+
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends SupplierCommandResponse with EntityProtocol.CommandFailed[Id]
 
     trait SupplierUpdateEvent extends SupplierEvent with EntityProtocol.UpdateEvent[Id]
 
     case class NameUpdated(id: EventId, entityId: Id, name: String)
       extends SupplierUpdateEvent
 
+  }
+
+  object Query {
+
+    case class GetStateRequest(id: EntityProtocol.QueryRequestId, entityId: Id) extends EntityProtocol.GetStateRequest[Id]
+
+    case class GetStateResponse(id: EntityProtocol.QueryResponseId, queryRequestId: EntityProtocol.QueryRequestId, entityId: Id, entity: Option[Supplier])
+      extends EntityProtocol.GetStateResponse[Id, Supplier]
+
+  }
+
+}
+
+object Supplier extends EntityFactory[SupplierId, Supplier, SupplierCreateEvent, SupplierUpdateEvent] {
+
+  override def createFromEvent: PartialFunction[SupplierCreateEvent, Supplier] = {
+    case SupplierCreated(_, id, name, postalAddress, contact) =>
+      Supplier(id, StatusType.Enabled, name, postalAddress, contact, Some(1L))
   }
 
 }
