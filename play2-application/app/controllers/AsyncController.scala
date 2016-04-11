@@ -28,7 +28,7 @@ class AsyncController @Inject() (actorSystem: ActorSystem)(implicit exec: Execut
    * will be called when the application receives a `GET` request with
    * a path of `/message`.
    */
-  def message = Action.async {
+  def message: Action[AnyContent] = Action.async {
     getFutureMessage(1.second).map { msg => Ok(msg) }
   }
 

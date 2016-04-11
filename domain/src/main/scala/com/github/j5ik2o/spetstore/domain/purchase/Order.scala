@@ -36,15 +36,15 @@ object OrderAggregateProtocol extends EntityProtocol {
     }
 
     case class CreateOrder(
-      id:              CommandRequestId,
-      entityId:        Id,
-      orderStatus:     OrderStatus.Value,
-      orderDate:       DateTime,
-      customerId:      CustomerId,
-      customerName:    String,
-      shippingAddress: PostalAddress,
-      shippingContact: Contact,
-      orderItems:      List[OrderItem]
+        id:              CommandRequestId,
+        entityId:        Id,
+        orderStatus:     OrderStatus.Value,
+        orderDate:       DateTime,
+        customerId:      CustomerId,
+        customerName:    String,
+        shippingAddress: PostalAddress,
+        shippingContact: Contact,
+        orderItems:      List[OrderItem]
     ) extends OrderCreateCommandRequest {
       override def toEvent: OrderCreateEvent =
         OrderCreated(

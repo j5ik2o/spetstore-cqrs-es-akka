@@ -34,10 +34,10 @@ object CartAggregateProtocol extends domainsupport.EntityProtocol {
     }
 
     case class CreateCart(
-      id:         CommandRequestId,
-      entityId:   CartId,
-      customerId: CustomerId,
-      cartItems:  List[CartItem]
+        id:         CommandRequestId,
+        entityId:   CartId,
+        customerId: CustomerId,
+        cartItems:  List[CartItem]
     ) extends CartCreateCommandRequest {
       override def toEvent: CartCreateEvent =
         CartCreated(EventId(), entityId, customerId, cartItems)

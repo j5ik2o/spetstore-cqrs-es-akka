@@ -2,7 +2,7 @@ package com.github.j5ik2o.spetstore.usecase
 
 import com.github.j5ik2o.spetstore.domain.basic.Pref
 
-case class CreateCustomer(
+case class CreateCustomerApp(
   name:         String,
   sexType:      Int,
   zipCode:      String,
