@@ -31,11 +31,11 @@ object SupplierAggregateProtocol extends EntityProtocol {
     }
 
     case class CreateSupplier(
-      id:            CommandRequestId,
-      entityId:      Id,
-      name:          String,
-      postalAddress: PostalAddress,
-      contact:       Contact
+        id:            CommandRequestId,
+        entityId:      Id,
+        name:          String,
+        postalAddress: PostalAddress,
+        contact:       Contact
     ) extends SupplierCreateCommandRequest {
       override def toEvent: SupplierCreateEvent =
         SupplierCreated(EventId(), entityId, name, postalAddress, contact)

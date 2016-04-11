@@ -9,6 +9,6 @@ import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityId
  *
  * @param value 識別子の値
  */
-case class CartId(value: UUID)
+case class CartId(value: UUID = UUID.randomUUID())
   extends EntityId
 

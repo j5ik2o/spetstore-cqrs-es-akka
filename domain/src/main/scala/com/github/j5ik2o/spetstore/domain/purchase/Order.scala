@@ -3,21 +3,21 @@ package com.github.j5ik2o.spetstore.domain.purchase
 import com.github.j5ik2o.spetstore.domain.basic.{ Contact, PostalAddress, StatusType }
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 import com.github.j5ik2o.spetstore.domain.model.purchase.OrderStatus
-import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.OrderEvent.{ CustomerNameUpdated, OrderUpdateEvent }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.EventId
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport._
+import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.Create.{ OrderCreateEvent, OrderCreated }
+import com.github.j5ik2o.spetstore.domain.purchase.OrderAggregateProtocol.Update.{ CustomerNameUpdated, OrderUpdateEvent }
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, EventId }
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ BaseEntity, Entity, EntityFactory, EntityProtocol }
 import org.joda.time.DateTime
 
 import scala.collection.mutable.ListBuffer
 
 object OrderAggregateProtocol extends EntityProtocol {
-
-  override type Id = OrderId
-  override type CommandRequest = OrderCommandRequest
-  override type CommandResponse = OrderCommandResponse
-  override type Event = OrderEvent
-  override type QueryRequest = OrderQueryRequest
-  override type QueryResponse = OrderQueryResponse
+  type Id = OrderId
+  type CommandRequest = OrderCommandRequest
+  type CommandResponse = OrderCommandResponse
+  type Event = OrderEvent
+  type QueryRequest = OrderQueryRequest
+  type QueryResponse = OrderQueryResponse
 
   sealed trait OrderCommandRequest extends EntityProtocol.CommandRequest[Id]
 
@@ -31,11 +31,77 @@ object OrderAggregateProtocol extends EntityProtocol {
 
   object Create {
 
+    trait OrderCreateCommandRequest extends OrderCommandRequest with EntityProtocol.CreateCommandRequest[Id] {
+      override def toEvent: OrderCreateEvent
+    }
+
+    case class CreateOrder(
+      id:              CommandRequestId,
+      entityId:        Id,
+      orderStatus:     OrderStatus.Value,
+      orderDate:       DateTime,
+      customerId:      CustomerId,
+      customerName:    String,
+      shippingAddress: PostalAddress,
+      shippingContact: Contact,
+      orderItems:      List[OrderItem]
+    ) extends OrderCreateCommandRequest {
+      override def toEvent: OrderCreateEvent =
+        OrderCreated(
+          EventId(),
+          entityId,
+          orderStatus,
+          orderDate,
+          customerId,
+          customerName,
+          shippingAddress,
+          shippingContact,
+          orderItems
+        )
+    }
+
+    case class CreateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends OrderCommandResponse with EntityProtocol.CommandSucceeded[Id, Order]
+
+    case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends OrderCommandResponse with EntityProtocol.CommandFailed[Id]
+
     trait OrderCreateEvent extends OrderEvent with EntityProtocol.CreateEvent[Id]
+
+    case class OrderCreated(
+      id:              EventId,
+      entityId:        Id,
+      orderStatus:     OrderStatus.Value,
+      orderDate:       DateTime,
+      customerId:      CustomerId,
+      customerName:    String,
+      shippingAddress: PostalAddress,
+      shippingContact: Contact,
+      orderItems:      List[OrderItem]
+    ) extends OrderCreateEvent
 
   }
 
-  object OrderEvent {
+  object Update {
+
+    trait OrderUpdateCommandRequest extends OrderCommandRequest with EntityProtocol.UpdateCommandRequest[Id] {
+      override def toEvent: OrderUpdateEvent
+    }
+
+    case class UpdateCustomerName(
+      id:       CommandRequestId,
+      entityId: Id,
+      name:     String
+    )
+        extends OrderUpdateCommandRequest {
+      override def toEvent: OrderUpdateEvent = CustomerNameUpdated(EventId(), entityId, name)
+    }
+
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends OrderCommandResponse with EntityProtocol.CommandSucceeded[Id, Order]
+
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends OrderCommandResponse with EntityProtocol.CommandFailed[Id]
 
     trait OrderUpdateEvent extends OrderEvent with EntityProtocol.UpdateEvent[Id]
 
@@ -44,6 +110,22 @@ object OrderAggregateProtocol extends EntityProtocol {
 
   }
 
+  object Query {
+
+    case class GetStateRequest(id: EntityProtocol.QueryRequestId, entityId: Id) extends EntityProtocol.GetStateRequest[Id]
+
+    case class GetStateResponse(id: EntityProtocol.QueryResponseId, queryRequestId: EntityProtocol.QueryRequestId, entityId: Id, entity: Option[Order])
+      extends EntityProtocol.GetStateResponse[Id, Order]
+
+  }
+
+}
+
+object Order extends EntityFactory[OrderId, Order, OrderCreateEvent, OrderUpdateEvent] {
+  override def createFromEvent: PartialFunction[OrderCreateEvent, Order] = {
+    case OrderCreated(_, id, orderStatus, orderDate, customerId, customerName, shippingAddress, shippingContact, orderItems) =>
+      Order(id, StatusType.Enabled, orderStatus, orderDate, customerId, customerName, shippingAddress, shippingContact, orderItems, Some(1L))
+  }
 }
 
 /**

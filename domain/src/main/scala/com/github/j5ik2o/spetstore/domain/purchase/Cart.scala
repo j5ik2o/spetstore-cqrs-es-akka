@@ -3,16 +3,19 @@ package com.github.j5ik2o.spetstore.domain.purchase
 import com.github.j5ik2o.spetstore.domain.basic.StatusType
 import com.github.j5ik2o.spetstore.domain.customer.CustomerId
 import com.github.j5ik2o.spetstore.domain.item.ItemId
+import com.github.j5ik2o.spetstore.domain.purchase.CartAggregateProtocol.Create.{ CartCreateEvent, CartCreated }
 import com.github.j5ik2o.spetstore.domain.purchase.CartAggregateProtocol.Update.{ CartItemsAdded, CartItemsRemoved, CartUpdateEvent }
-import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ BaseEntity, Entity, EntityProtocol }
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{ CommandRequestId, EventId }
+import com.github.j5ik2o.spetstore.infrastructure.domainsupport.{ BaseEntity, Entity, EntityFactory, EntityProtocol }
 
-object CartAggregateProtocol extends EntityProtocol {
-  override type Id = CartId
-  override type CommandRequest = CartCommandRequest
-  override type CommandResponse = CartCommandResponse
-  override type Event = CartEvent
-  override type QueryRequest = CartQueryRequest
-  override type QueryResponse = CartQueryResponse
+object CartAggregateProtocol extends domainsupport.EntityProtocol {
+  type Id = CartId
+  type CommandRequest = CartCommandRequest
+  type CommandResponse = CartCommandResponse
+  type Event = CartEvent
+  type QueryRequest = CartQueryRequest
+  type QueryResponse = CartQueryResponse
 
   sealed trait CartCommandRequest extends EntityProtocol.CommandRequest[Id]
 
@@ -26,11 +29,49 @@ object CartAggregateProtocol extends EntityProtocol {
 
   object Create {
 
+    trait CartCreateCommandRequest extends CartCommandRequest with EntityProtocol.CreateCommandRequest[Id] {
+      override def toEvent: CartCreateEvent
+    }
+
+    case class CreateCart(
+      id:         CommandRequestId,
+      entityId:   CartId,
+      customerId: CustomerId,
+      cartItems:  List[CartItem]
+    ) extends CartCreateCommandRequest {
+      override def toEvent: CartCreateEvent =
+        CartCreated(EventId(), entityId, customerId, cartItems)
+    }
+
+    case class CreateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends CartCommandResponse with EntityProtocol.CommandSucceeded[Id, Cart]
+
+    case class CreateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends CartCommandResponse with EntityProtocol.CommandFailed[Id]
+
     trait CartCreateEvent extends CartEvent with EntityProtocol.CreateEvent[Id]
+
+    case class CartCreated(
+      id:         EventId,
+      entityId:   Id,
+      customerId: CustomerId,
+      cartItems:  List[CartItem]
+    )
+        extends CartCreateEvent
 
   }
 
   object Update {
+
+    trait CartUpdateCommandRequest extends CartCommandRequest with EntityProtocol.UpdateCommandRequest[Id] {
+      override def toEvent: CartUpdateEvent
+    }
+
+    case class UpdateSucceeded(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id)
+      extends CartCommandResponse with EntityProtocol.CommandSucceeded[Id, Cart]
+
+    case class UpdateFailed(id: EntityProtocol.CommandResponseId, commandRequestId: EntityProtocol.CommandRequestId, entityId: Id, throwable: Throwable)
+      extends CartCommandResponse with EntityProtocol.CommandFailed[Id]
 
     trait CartUpdateEvent extends CartEvent with EntityProtocol.UpdateEvent[Id]
 
@@ -42,6 +83,22 @@ object CartAggregateProtocol extends EntityProtocol {
 
   }
 
+  object Query {
+
+    case class GetStateRequest(id: EntityProtocol.QueryRequestId, entityId: Id) extends EntityProtocol.GetStateRequest[Id]
+
+    case class GetStateResponse(id: EntityProtocol.QueryResponseId, queryRequestId: EntityProtocol.QueryRequestId, entityId: Id, entity: Option[Cart])
+      extends EntityProtocol.GetStateResponse[Id, Cart]
+
+  }
+
+}
+
+object Cart extends EntityFactory[CartId, Cart, CartCreateEvent, CartUpdateEvent] {
+  override def createFromEvent: PartialFunction[CartCreateEvent, Cart] = {
+    case CartCreated(_, id, customerId, cartItems) =>
+      Cart(id, StatusType.Enabled, customerId, cartItems, Some(1L))
+  }
 }
 
 /**

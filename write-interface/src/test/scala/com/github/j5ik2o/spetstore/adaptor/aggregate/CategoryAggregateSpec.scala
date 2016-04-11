@@ -12,14 +12,15 @@ import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.{
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{ BeforeAndAfterAll, FunSpecLike }
 
-class CategoryAggregateSpec extends TestKit(ActorSystem("CategoryAggregateSpec", ConfigFactory.parseString(
-  """
+class CategoryAggregateSpec
+    extends TestKit(ActorSystem("CategoryAggregateSpec", ConfigFactory.parseString(
+      """
     |akka {
     |  loglevel = DEBUG
     |  persistence.journal.plugin = "akka.persistence.journal.inmem"
     |}
   """.stripMargin
-))) with ImplicitSender with FunSpecLike with BeforeAndAfterAll {
+    ))) with ImplicitSender with FunSpecLike with BeforeAndAfterAll {
 
   val eventBus = EventBus.ofLocal(system)
 
