@@ -1,6 +1,12 @@
+
+import com.github.tototoshi.play2.json4s.jackson.Json4s
+import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
 import org.scalatestplus.play._
-import play.api.test._
+import play.api.Configuration
 import play.api.test.Helpers._
+import play.api.test._
 
 /**
  * Add your spec here.
@@ -9,32 +15,36 @@ import play.api.test.Helpers._
  */
 class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
-  "Routes" should {
+  val configuration = Configuration.empty
 
-    "send 404 on a bad request" in {
-      route(app, FakeRequest(GET, "/boum")).map(status(_)) mustBe Some(NOT_FOUND)
-    }
+  val json4s = new Json4s(configuration)
 
-  }
+  import json4s._
 
-  "HomeController" should {
+  "CustomerController" should {
 
-    "render the index page" in {
-      val home = route(app, FakeRequest(GET, "/")).get
+    "create" in {
+      val create = route(app, FakeRequest(POST, "/customers").withJson4sBody(parse(
+        """
+          |{
+          |  "name" : "hoge",
+          |  "sexType" : 1,
+          |  "zipCode" : "111-1111",
+          |  "pref" : 1,
+          |  "cityName" : "test",
+          |  "addressName" : "test",
+          |  "buildingName" : null,
+          |  "email" : "test@test.com",
+          |  "phone" : "090-0000-0000",
+          |  "loginName" : "test",
+          |  "password" : "test",
+          |  "favoriteCategoryId": null
+          |}
+        """.stripMargin
+      ))).get
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include("Your new application is ready.")
-    }
-
-  }
-
-  "CountController" should {
-
-    "return an increasing count" in {
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "0"
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "1"
-      contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "2"
+      status(create) mustBe OK
+      contentType(create) mustBe Some("application/json")
     }
 
   }

@@ -1,4 +1,5 @@
-2016-04-12 10:25:18,567 [INFO] from play.core.server.NettyServer in pool-10-thread-6 - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
-2016-04-12 10:25:27,442 [INFO] from play.api.Play in ForkJoinPool-2-worker-1 - Application started (Dev)
-2016-04-12 10:25:30,721 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-5 - Application started (Dev)
-2016-04-12 10:25:31,389 [WARN] from akka.persistence.Persistence(akka://application) in application-akka.actor.default-dispatcher-5 - No default snapshot store configured! To configure a default snapshot-store plugin set the `akka.persistence.snapshot-store.plugin` key. For details see 'reference.conf'
+2016-04-12 11:15:18,046 [INFO] from play.core.server.NettyServer in pool-4-thread-2 - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+2016-04-12 11:15:30,542 [INFO] from play.api.Play in ForkJoinPool-1-worker-1 - Application started (Dev)
+2016-04-12 11:15:36,342 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-7 - Application started (Dev)
+2016-04-12 11:15:36,973 [WARN] from akka.persistence.Persistence(akka://application) in application-akka.actor.default-dispatcher-2 - No default snapshot store configured! To configure a default snapshot-store plugin set the `akka.persistence.snapshot-store.plugin` key. For details see 'reference.conf'
+2016-04-12 12:35:42,091 [WARN] from akka.persistence.Persistence(akka://application) in application-akka.actor.default-dispatcher-2 - No default snapshot store configured! To configure a default snapshot-store plugin set the `akka.persistence.snapshot-store.plugin` key. For details see 'reference.conf'
