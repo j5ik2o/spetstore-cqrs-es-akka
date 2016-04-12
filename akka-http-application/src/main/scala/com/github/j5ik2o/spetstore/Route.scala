@@ -14,7 +14,7 @@ trait Route extends SprayJsonSupport with CustomerSupport {
 
   implicit val materializer: Materializer
 
-  implicit val ctx: ExecutionContext
+  implicit val executor: ExecutionContext
 
   val customerWriteRoutes = path("customers") {
     post {

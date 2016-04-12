@@ -10,19 +10,20 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 
 class EventBussProvider @Inject() (actorSystem: ActorSystem, materializer: Materializer) extends Provider[EventBus] {
   override def get(): EventBus = {
-    EventBus.ofLocal(actorSystem)
+    EventBus.ofRemote(actorSystem)
   }
 }
 
 class CustomerAggregateProvider @Inject() (actorSystem: ActorSystem, eventBus: EventBus) extends Provider[ActorRef] {
   override def get(): ActorRef = {
-    actorSystem.actorOf(CustomerMessageBroker.props(eventBus))
+    CustomerMessageBroker(eventBus)(actorSystem)
   }
 }
 
 class Module extends AbstractModule with AkkaGuiceSupport {
 
   override def configure() = {
+    bind(classOf[SharedJournalStarter]).asEagerSingleton()
     bind(classOf[EventBus])
       .toProvider(classOf[EventBussProvider])
       .asEagerSingleton()

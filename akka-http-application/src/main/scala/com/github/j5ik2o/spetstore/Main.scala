@@ -1,6 +1,6 @@
 package com.github.j5ik2o.spetstore
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorPath, ActorSystem }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.{ ActorMaterializer, Materializer }
@@ -8,25 +8,34 @@ import akka.util.Timeout
 import com.github.j5ik2o.spetstore.adaptor.aggregate.CustomerMessageBroker
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
 import com.github.j5ik2o.spetstore.usecase.CustomerUseCase
+import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object Main extends App with Route {
+object Main extends App with Route with SharedJournalSupport {
   val httpInterface = "0.0.0.0"
   val httpPort = 8080
 
-  implicit val timeout = Timeout(10 seconds)
+  val configuration = ConfigFactory.parseString("akka.remote.netty.tcp.port = " + 2551)
+    .withFallback(ConfigFactory.load())
 
-  implicit val actorSystem: ActorSystem = ActorSystem("SpetStore")
+  val clusterPort = configuration.getInt("akka.remote.netty.tcp.port")
+
+  private implicit val actorSystem = ActorSystem("ClusterSystem", configuration)
+
+  override implicit val executor: ExecutionContext = actorSystem.dispatcher
 
   override implicit val materializer: Materializer = ActorMaterializer()
 
-  override implicit val ctx: ExecutionContext = actorSystem.dispatcher
+  startupSharedJournal(
+    startStore = clusterPort == 2551,
+    path       = ActorPath.fromString("akka.tcp://ClusterSystem@127.0.0.1:2551/user/store")
+  )
 
-  val eventBus = EventBus.ofLocal(actorSystem)
+  val eventBus = EventBus.ofRemote(actorSystem)
 
-  val customerAggregate = actorSystem.actorOf(CustomerMessageBroker.props(eventBus))
+  val customerAggregate = CustomerMessageBroker(eventBus)
 
   override val customerUseCase: CustomerUseCase = CustomerUseCase(customerAggregate)
 

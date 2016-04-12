@@ -71,6 +71,13 @@ val readInterface = (project in file("read-interface"))
 
 val akkaHttpApplication = (project in file("akka-http-application"))
   .settings(commonSettings: _*)
+    .settings(
+      libraryDependencies ++= Seq(
+        "com.typesafe" % "config" % "1.3.0",
+        "org.iq80.leveldb" % "leveldb" % "0.7",
+        "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
+      )
+    )
   .dependsOn(writeInterface, readInterface)
 
 val play2Application = (project in file("play2-application"))
@@ -85,6 +92,8 @@ val play2Application = (project in file("play2-application"))
       ws,
       "com.github.tototoshi" %% "play-json4s-jackson" % "0.5.0",
       "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.5.0" % "test",
+      "org.iq80.leveldb" % "leveldb" % "0.7",
+      "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0-RC1" % Test
     ),
     resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

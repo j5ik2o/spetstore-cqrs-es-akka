@@ -6,7 +6,8 @@ import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
 import com.github.j5ik2o.spetstore.domain.item.CategoryAggregateProtocol.CategoryCommandRequest
 import com.github.j5ik2o.spetstore.domain.item.CategoryId
 
-final class CategoryMessageBroker(eventBus: EventBus) extends AbstractMessageBroker[CategoryId, CategoryCommandRequest] {
+final class CategoryMessageBroker(eventBus: EventBus)
+    extends AbstractMessageBroker[CategoryId, CategoryCommandRequest] with PassivationSupport {
 
   override def createChildProps(aggregateId: CategoryId): Props = CategoryAggregate.props(eventBus, aggregateId)
 
