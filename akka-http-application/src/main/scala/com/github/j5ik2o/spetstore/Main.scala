@@ -3,11 +3,10 @@ package com.github.j5ik2o.spetstore
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import com.github.j5ik2o.spetstore.adaptor.aggregate.CustomerMessageBroker
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
-import com.github.j5ik2o.spetstore.adaptor.http.Route
 import com.github.j5ik2o.spetstore.usecase.CustomerUseCase
 
 import scala.concurrent.ExecutionContext

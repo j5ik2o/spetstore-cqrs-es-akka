@@ -17,8 +17,3 @@ case class CreateCustomerJson(
   favoriteCategoryId: Option[String]
 )
 
-object CreateCustomerJsonProtocol extends DefaultJsonProtocol {
-
-  implicit val CreateCustomerJsonFormat = jsonFormat12(CreateCustomerJson)
-
-}

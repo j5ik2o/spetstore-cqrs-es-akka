@@ -83,6 +83,8 @@ val play2Application = (project in file("play2-application"))
       jdbc,
       cache,
       ws,
+      "com.github.tototoshi" %% "play-json4s-jackson" % "0.5.0",
+      "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.5.0" % "test",
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0-RC1" % Test
     ),
     resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

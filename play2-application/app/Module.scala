@@ -1,28 +1,35 @@
-import com.google.inject.AbstractModule
-import java.time.Clock
+import javax.inject.Inject
 
-import services.{ ApplicationTimer, AtomicCounter, Counter }
+import akka.actor.{ActorRef, ActorSystem}
+import akka.stream.Materializer
+import com.github.j5ik2o.spetstore.adaptor.aggregate.CustomerMessageBroker
+import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
+import com.google.inject.name.Names
+import com.google.inject.{AbstractModule, Provider}
+import play.api.libs.concurrent.AkkaGuiceSupport
 
-/**
- * This class is a Guice module that tells Guice how to bind several
- * different types. This Guice module is created when the Play
- * application starts.
- *
- * Play will automatically use any class called `Module` that is in
- * the root package. You can create modules in other locations by
- * adding `play.modules.enabled` settings to the `application.conf`
- * configuration file.
- */
-class Module extends AbstractModule {
+class EventBussProvider @Inject()(actorSystem: ActorSystem, materializer: Materializer) extends Provider[EventBus] {
+  override def get(): EventBus = {
+    EventBus.ofLocal(actorSystem)
+  }
+}
+
+class CustomerAggregateProvider @Inject()(actorSystem: ActorSystem, eventBus: EventBus) extends Provider[ActorRef] {
+  override def get(): ActorRef = {
+    actorSystem.actorOf(CustomerMessageBroker.props(eventBus))
+  }
+}
+
+class Module extends AbstractModule with AkkaGuiceSupport {
 
   override def configure() = {
-    // Use the system clock as the default implementation of Clock
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
-    // Ask Guice to create an instance of ApplicationTimer when the
-    // application starts.
-    bind(classOf[ApplicationTimer]).asEagerSingleton
-    // Set AtomicCounter as the implementation for Counter.
-    bind(classOf[Counter]).to(classOf[AtomicCounter])
+    bind(classOf[EventBus])
+      .toProvider(classOf[EventBussProvider])
+      .asEagerSingleton()
+    bind(classOf[ActorRef])
+      .annotatedWith(Names.named("customer-aggregate"))
+      .toProvider(classOf[CustomerAggregateProvider])
+      .asEagerSingleton()
   }
 
 }
