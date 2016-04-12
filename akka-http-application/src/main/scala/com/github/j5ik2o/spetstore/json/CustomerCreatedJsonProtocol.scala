@@ -1,4 +1,4 @@
-package com.github.j5ik2o.spetstore
+package com.github.j5ik2o.spetstore.json
 
 import com.github.j5ik2o.spetstore.adaptor.http.CustomerCreatedJson
 import spray.json.DefaultJsonProtocol
