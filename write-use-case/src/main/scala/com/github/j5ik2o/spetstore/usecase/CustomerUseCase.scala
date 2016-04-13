@@ -1,7 +1,5 @@
 package com.github.j5ik2o.spetstore.usecase
 
-import java.util.UUID
-
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
@@ -10,7 +8,6 @@ import akka.util.Timeout
 import com.github.j5ik2o.spetstore.domain.basic._
 import com.github.j5ik2o.spetstore.domain.customer.CustomerAggregateProtocol.Create.{ CreateCustomer, CreateSucceeded }
 import com.github.j5ik2o.spetstore.domain.customer._
-import com.github.j5ik2o.spetstore.domain.item.CategoryId
 import com.github.j5ik2o.spetstore.infrastructure.domainsupport.EntityProtocol.CommandRequestId
 
 import scala.concurrent.ExecutionContext
@@ -41,9 +38,7 @@ case class CustomerUseCase(actorRef: ActorRef)(implicit timeout: Timeout, execut
         CustomerConfig(
           createCustomerApp.loginName,
           createCustomerApp.password,
-          createCustomerApp.favoriteCategoryId.map { id =>
-            CategoryId(UUID.fromString(id))
-          }
+          createCustomerApp.favoriteCategoryId
         ),
         Some(1L)
       )

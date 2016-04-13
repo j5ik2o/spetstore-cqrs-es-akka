@@ -5,9 +5,9 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.Timeout
-import com.github.j5ik2o.spetstore.adaptor.aggregate.CustomerMessageBroker
+import com.github.j5ik2o.spetstore.adaptor.aggregate.{ CustomerMessageBroker, ItemTypeAggregate, ItemTypeMessageBroker }
 import com.github.j5ik2o.spetstore.adaptor.eventbus.EventBus
-import com.github.j5ik2o.spetstore.usecase.CustomerUseCase
+import com.github.j5ik2o.spetstore.usecase.{ CustomerUseCase, ItemTypeUseCase }
 import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.concurrent.ExecutionContext
@@ -36,7 +36,9 @@ object Main extends App with Route with SharedJournalSupport {
   val eventBus = EventBus.ofRemote(actorSystem)
 
   val customerAggregate = CustomerMessageBroker(eventBus)
+  val itemTypeAggregate = ItemTypeMessageBroker(eventBus)
 
+  override val itemTypeUseCase: ItemTypeUseCase = ItemTypeUseCase(itemTypeAggregate)
   override val customerUseCase: CustomerUseCase = CustomerUseCase(customerAggregate)
 
   Http().bindAndHandle(

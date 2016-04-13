@@ -1,8 +1,11 @@
 package com.github.j5ik2o.spetstore.adaptor.http
 
+import java.util.UUID
+
 import akka.NotUsed
 import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink, Source }
 import com.github.j5ik2o.spetstore.domain.basic.Pref
+import com.github.j5ik2o.spetstore.domain.item.CategoryId
 import com.github.j5ik2o.spetstore.usecase.{ CreateCustomerApp, CustomerCreatedApp, CustomerUseCase }
 
 import scala.concurrent.Future
@@ -25,7 +28,7 @@ trait CustomerSupport {
         createCustomerJson.phone,
         createCustomerJson.loginName,
         createCustomerJson.password,
-        createCustomerJson.favoriteCategoryId
+        createCustomerJson.favoriteCategoryId.map(e => CategoryId(UUID.fromString(e)))
       )
     }
 

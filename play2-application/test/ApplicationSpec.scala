@@ -49,4 +49,23 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   }
 
+  "ItemTypeController" should {
+
+    "create" in {
+      val create = route(app, FakeRequest(POST, "/item-types").withJson4sBody(parse(
+        """
+          |{
+          |  "categoryId" : "7fdd6574-2f98-4315-a9b7-4bbe048eb29d",
+          |  "name" : "test",
+          |  "description": null
+          |}
+        """.stripMargin
+      ))).get
+
+      status(create) mustBe OK
+      contentType(create) mustBe Some("application/json")
+    }
+
+  }
+
 }

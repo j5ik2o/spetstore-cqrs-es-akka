@@ -10,6 +10,7 @@
 #GET     /message                    controllers.AsyncController.message
 
 POST    /customers                  controllers.CustomerController.create
+POST    /item-types                 controllers.ItemTypeController.create
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

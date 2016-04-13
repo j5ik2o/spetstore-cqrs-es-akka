@@ -1,6 +1,7 @@
 package com.github.j5ik2o.spetstore.usecase
 
 import com.github.j5ik2o.spetstore.domain.basic.Pref
+import com.github.j5ik2o.spetstore.domain.item.CategoryId
 
 case class CreateCustomerApp(
   name:         String,
@@ -13,5 +14,5 @@ case class CreateCustomerApp(
   email:        String, phone: String,
   loginName:          String,
   password:           String,
-  favoriteCategoryId: Option[String]
+  favoriteCategoryId: Option[CategoryId]
 )
