@@ -34,10 +34,10 @@ final class ItemAggregate(eventBus: EventBus, id: ItemId)
   override def createFailed[C <: EntityProtocol.CommandRequest[ItemId]: ClassTag](commandRequest: C): EntityProtocol.CommandFailed[ItemId] =
     CreateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
-  override def updateSucceeded[C <: EntityProtocol.CommandRequest[ItemId]](commandRequest: C): EntityProtocol.CommandSucceeded[ItemId, Item] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[ItemId] : ClassTag](commandRequest: C): EntityProtocol.CommandSucceeded[ItemId, Item] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, id)
 
-  override def updateFailed[C <: EntityProtocol.CommandRequest[ItemId]](commandRequest: C): EntityProtocol.CommandFailed[ItemId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[ItemId] : ClassTag](commandRequest: C): EntityProtocol.CommandFailed[ItemId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
   override def receiveRecover: Receive = {

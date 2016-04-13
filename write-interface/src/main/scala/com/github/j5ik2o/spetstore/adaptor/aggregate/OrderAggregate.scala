@@ -32,10 +32,10 @@ final class OrderAggregate(eventBus: EventBus, id: OrderId) extends AbstractAggr
   override def createFailed[C <: EntityProtocol.CommandRequest[OrderId]: ClassTag](commandRequest: C): CommandFailed[OrderId] =
     CreateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
-  override def updateSucceeded[C <: EntityProtocol.CommandRequest[OrderId]](commandRequest: C): CommandSucceeded[OrderId, Order] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[OrderId] : ClassTag](commandRequest: C): CommandSucceeded[OrderId, Order] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, id)
 
-  override def updateFailed[C <: EntityProtocol.CommandRequest[OrderId]](commandRequest: C): CommandFailed[OrderId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[OrderId] : ClassTag](commandRequest: C): CommandFailed[OrderId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
   override def receiveRecover: Receive = {

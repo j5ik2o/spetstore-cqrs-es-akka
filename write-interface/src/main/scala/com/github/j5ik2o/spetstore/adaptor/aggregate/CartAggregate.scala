@@ -32,10 +32,10 @@ final class CartAggregate(eventBus: EventBus, id: CartId)
   override def createFailed[C <: EntityProtocol.CommandRequest[CartId]: ClassTag](commandRequest: C): CommandFailed[CartId] =
     CreateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
-  override def updateSucceeded[C <: EntityProtocol.CommandRequest[CartId]](commandRequest: C): CommandSucceeded[CartId, Cart] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[CartId] : ClassTag](commandRequest: C): CommandSucceeded[CartId, Cart] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, id)
 
-  override def updateFailed[C <: EntityProtocol.CommandRequest[CartId]](commandRequest: C): CommandFailed[CartId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[CartId] : ClassTag](commandRequest: C): CommandFailed[CartId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, id, new Exception)
 
   override def receiveRecover: Receive = {

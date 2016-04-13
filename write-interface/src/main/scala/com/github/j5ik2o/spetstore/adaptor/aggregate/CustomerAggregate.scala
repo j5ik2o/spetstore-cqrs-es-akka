@@ -33,10 +33,10 @@ final class CustomerAggregate(eventBus: EventBus, id: CustomerId)
   override def createFailed[C <: EntityProtocol.CommandRequest[CustomerId]: ClassTag](commandRequest: C): EntityProtocol.CommandFailed[CustomerId] =
     CreateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
-  override def updateSucceeded[C <: EntityProtocol.CommandRequest[CustomerId]](commandRequest: C): EntityProtocol.CommandSucceeded[CustomerId, Customer] =
+  override def updateSucceeded[C <: EntityProtocol.CommandRequest[CustomerId] : ClassTag](commandRequest: C): EntityProtocol.CommandSucceeded[CustomerId, Customer] =
     UpdateSucceeded(CommandResponseId(), commandRequest.id, commandRequest.entityId)
 
-  override def updateFailed[C <: EntityProtocol.CommandRequest[CustomerId]](commandRequest: C): EntityProtocol.CommandFailed[CustomerId] =
+  override def updateFailed[C <: EntityProtocol.CommandRequest[CustomerId] : ClassTag](commandRequest: C): EntityProtocol.CommandFailed[CustomerId] =
     UpdateFailed(CommandResponseId(), commandRequest.id, commandRequest.entityId, new Exception)
 
   override def receiveRecover: Receive = {
